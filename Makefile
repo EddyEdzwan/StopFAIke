@@ -56,10 +56,15 @@ pypi:
 
 
 # ----------------------------------
-#      UPLOAD PACKAGE TO PYPI
+#      GCP
 # ----------------------------------
 # path of the file to upload to gcp (the path of the file should be absolute or should match the directory where the make command is run)
 LOCAL_PATH=/Users/julienseguy/code/EddyEdzwan/StopFAIke/raw_data/FakesNewsNET.csv
+# LOCAL_PATH=/Users/julienseguy/code/EddyEdzwan/StopFAIke/raw_data/kaggle_Bisaillon/Fake.csv
+# LOCAL_PATH=/Users/julienseguy/code/EddyEdzwan/StopFAIke/raw_data/kaggle_Bisaillon/True.csv
+# LOCAL_PATH=/Users/julienseguy/code/EddyEdzwan/StopFAIke/raw_data/ISOT_Fake_News_Dataset/ISOT_Fake.csv
+# LOCAL_PATH=/Users/julienseguy/code/EddyEdzwan/StopFAIke/raw_data/ISOT_Fake_News_Dataset/ISOT_True.csv
+
 
 # project id
 PROJECT_ID=le-wagon-data-bootcamp-321006

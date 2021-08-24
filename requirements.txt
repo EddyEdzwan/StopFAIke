@@ -30,4 +30,4 @@ termcolor
 
 # specific
 tldextract
-nltk
+nltk==3.6.2
