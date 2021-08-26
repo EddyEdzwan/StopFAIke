@@ -31,3 +31,4 @@ termcolor
 # specific
 tldextract
 nltk==3.6.2
+bs4
