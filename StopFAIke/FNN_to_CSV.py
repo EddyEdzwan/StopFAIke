@@ -72,7 +72,7 @@ def main(path_to_load, path_to_save):
     gos_fake_df = get_data(dir_gos_fake)
 
     # Labeling
-    pol_real_df['category'] = 8     #True
+    pol_real_df['category'] = 0     #True
     pol_fake_df['category'] = 1     #Fake
     gos_real_df['category'] = 0
     gos_fake_df['category'] = 1
