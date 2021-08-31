@@ -64,7 +64,9 @@ pypi:
 # LOCAL_PATH=/Users/julienseguy/code/EddyEdzwan/StopFAIke/raw_data/kaggle_Bisaillon/True.csv
 # LOCAL_PATH=/Users/julienseguy/code/EddyEdzwan/StopFAIke/raw_data/ISOT_Fake_News_Dataset/ISOT_Fake.csv
 # LOCAL_PATH=/Users/julienseguy/code/EddyEdzwan/StopFAIke/raw_data/ISOT_Fake_News_Dataset/ISOT_True.csv
-LOCAL_PATH=/Users/julienseguy/code/EddyEdzwan/StopFAIke/raw_data/politifact_scrap.csv
+# LOCAL_PATH=/Users/julienseguy/code/EddyEdzwan/StopFAIke/raw_data/politifact_scrap.csv
+LOCAL_PATH=/Users/julienseguy/code/EddyEdzwan/StopFAIke/raw_data/poynter_final_condensed.csv
+
 
 
 # project id
