@@ -90,3 +90,55 @@ create_bucket:
 
 upload_data:
 	-@gsutil cp ${LOCAL_PATH} gs://${BUCKET_NAME}/${BUCKET_FOLDER}/${BUCKET_FILE_NAME}
+
+##### Training  - - - - - - - - - - - - - - - - - - - - - -
+# will store the packages uploaded to GCP for the training
+BUCKET_TRAINING_FOLDER = 'trainings'
+
+##### Model - - - - - - - - - - - - - - - - - - - - - - - -
+
+# not required here
+
+### GCP AI Platform - - - - - - - - - - - - - - - - - - - -
+##### Machine configuration - - - - - - - - - - - - - - - -
+REGION=europe-west1
+PYTHON_VERSION=3.7
+RUNTIME_VERSION=1.15
+
+##### Package params  - - - - - - - - - - - - - - - - - - -
+PACKAGE_NAME=StopFAIke
+FILENAME=trainer
+
+##### Job - - - - - - - - - - - - - - - - - - - - - - - - -
+JOB_NAME=StopFAIke_training_$(shell date +'%Y%m%d_%H%M%S')
+
+
+run_locally:
+	@python -m ${PACKAGE_NAME}.${FILENAME}
+
+gcp_submit_training:
+	gcloud ai-platform jobs submit training ${JOB_NAME} \
+		--job-dir gs://${BUCKET_NAME}/${BUCKET_TRAINING_FOLDER} \
+		--package-path ${PACKAGE_NAME} \
+		--module-name ${PACKAGE_NAME}.${FILENAME} \
+		--python-version=${PYTHON_VERSION} \
+		--scale-tier=BASIC_TPU \
+		--distribution_strategy=tpu \
+		--runtime-version=${RUNTIME_VERSION} \
+		--region ${REGION} \
+		--stream-logs
+
+
+
+# gcloud ai-platform jobs submit training tpu_mnist_1 \
+#   --staging-bucket=gs://BUCKET_NAME \
+#   --package-path=official \
+#   --module-name=official.vision.image_classification.mnist_main \
+#   --runtime-version=2.5 \
+#   --python-version=3.7 \
+#   --scale-tier=BASIC_TPU \
+#   --region=us-central1 \
+#   -- \
+#   --distribution_strategy=tpu \
+#   --data_dir=gs://tfds-data/datasets \
+#   --model_dir=gs://BUCKET_NAME/tpu_mnist_1_output

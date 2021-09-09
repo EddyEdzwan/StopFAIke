@@ -1,136 +1,189 @@
+import numpy as np
+import pandas as pd
+
+import os
+import tensorflow as tf
+import tensorflow_hub as hub
+import tensorflow_text as text
+import tensorflow_addons as tfa
+from official.nlp import optimization
+
+import matplotlib.pyplot as plt
 
 from google.cloud import storage
-import pandas as pd
-from sklearn import linear_model
-import numpy as np
-import joblib
 
-### GCP Project - - - - - - - - - - - - - - - - - - - - - -
-PROJECT_ID = 'le-wagon-data-bootcamp-321006'
-
-### GCP Storage - - - - - - - - - - - - - - - - - - - - - -
-BUCKET_NAME = 'wagon-data-615-seguy'
-BUCKET_FOLDER = 'data'
-
-##### Data  - - - - - - - - - - - - - - - - - - - - - - - -
-
-# train data file location
-# /!\ here you need to decide if you are going to train using the provided and uploaded data/train_1k.csv sample file
-# or if you want to use the full dataset (you need need to upload it first of course)
-P_TRAIN_DATA_PATH = 'data/politifact_scrap.csv'
-FNN_TRAIN_DATA_PATH = 'data/FakesNewsNET.csv'
-BIS_T_BUCKET_TRAIN_DATA_PATH = 'data/True.csv'
-BIS_F_BUCKET_TRAIN_DATA_PATH = 'data/Fake.csv'
-PO_BUCKET_TRAIN_DATA_PATH = 'data/poynter_final_condensed.csv'
+from StopFAIke.data import get_data
+from StopFAIke.data import get_splits
+from StopFAIke.params import BERT_MODEL_NAME
+from StopFAIke.params import map_name_to_handle
+from StopFAIke.params import map_model_to_preprocess
 
 
-# model folder name (will contain the folders for all trained model versions)
-MODEL_NAME = 'StopFAIke'
-
-# model version folder name (where the trained model.joblib file will be stored)
-MODEL_VERSION = 'v1'
-
-
-def get_data_from_gcp(BUCKET_NAME, BUCKET_TRAIN_DATA_PATH, nrows=20000):
-    """method to get the training data (or a portion of it) from GCP"""
-    df = pd.read_csv(f"gs://{BUCKET_NAME}/{BUCKET_TRAIN_DATA_PATH}", nrows=nrows)
-    return df
+def init_TPU():
+    resolver = tf.distribute.cluster_resolver.TPUClusterResolver()
+    tf.config.experimental_connect_to_cluster(resolver)
+    tf.tpu.experimental.initialize_tpu_system(resolver)
+    strategy = tf.distribute.experimental.TPUStrategy(resolver)
+    return strategy
 
 
-# def get_data_from_gcp(nrows=10000, optimize=False, **kwargs):
-#     """method to get the training data (or a portion of it) from GCP"""
-#     path = 'https://storage.googleapis.com/wagon-data-615-seguy/data/politifact_scrap.csv'
-#     df = pd.read_csv(path, nrows=nrows)
-#     return df
+def get_model_name(BERT_MODEL_NAME):
+    tfhub_handle_encoder = map_name_to_handle[BERT_MODEL_NAME]
+    tfhub_handle_preprocess = map_model_to_preprocess[BERT_MODEL_NAME]
+
+    print('BERT model selected           :', tfhub_handle_encoder)
+    print('Preprocessing model auto-selected:', tfhub_handle_preprocess)
+    return tfhub_handle_encoder, tfhub_handle_preprocess
 
 
-# def get_data_from_gcp(nrows=10000, optimize=False, **kwargs):
-#     """method to get the training data (or a portion of it) from GCP"""
-#     path = 'https://storage.googleapis.com/wagon-data-615-seguy/data/FakesNewsNET.csv'
-#     df = pd.read_csv(path, nrows=nrows)
-#     return df
+def make_bert_preprocess_model():
+    text_input = tf.keras.layers.Input(shape=(), dtype=tf.string, name='text')
+    preprocessing_layer = hub.KerasLayer(tfhub_handle_preprocess, name='preprocessing')
+    encoder_inputs = preprocessing_layer(text_input)
+    return tf.keras.Model(text_input, encoder_inputs)
 
 
-# def get_data_from_gcp(nrows=10000, optimize=False, **kwargs):
-#     """method to get the training data (or a portion of it) from GCP"""
-#     true_path = 'https://storage.googleapis.com/wagon-data-615-seguy/data/True.csv'
-#     fake_path = 'https://storage.googleapis.com/wagon-data-615-seguy/data/Fake.csv'
-#     true_df = pd.read_csv(true_path, nrows=nrows)
-#     fake_df = pd.read_csv(fake_path, nrows=nrows)
-#     return true_df, fake_df
+AUTOTUNE = tf.data.AUTOTUNE
+def load_dataset(X, y, bert_preprocess_model, batch_size=32, is_training=True):
+
+    X = [np.array([item]) for item in X]
+    dataset = tf.data.Dataset.from_tensor_slices((X, y))
+    num_examples = len(X)
+
+    if is_training:
+        dataset = dataset.shuffle(num_examples)
+        dataset = dataset.repeat()
+    dataset = dataset.batch(batch_size)
+    dataset = dataset.map(lambda X_, y_: (bert_preprocess_model(X_), y_))
+    dataset = dataset.cache().prefetch(buffer_size=AUTOTUNE)
+    return dataset, num_examples
 
 
-# def get_data_from_gcp(nrows=10000, optimize=False, **kwargs):
-#     """method to get the training data (or a portion of it) from GCP"""
-#     path = 'https://storage.googleapis.com/wagon-data-615-seguy/data/poynter_final_condensed.csv'
-#     df = pd.read_csv(path, nrows=nrows)
-#     return df
+def build_classifier_model():
+    class Classifier(tf.keras.Model):
+        def __init__(self):
+            super(Classifier, self).__init__(name="prediction")
+            self.encoder = hub.KerasLayer(tfhub_handle_encoder, trainable=True)
+            self.dropout = tf.keras.layers.Dropout(0.5)
+            self.dense_int = tf.keras.layers.Dense(128, activation='relu')
+            self.dense_final = tf.keras.layers.Dense(1, activation='sigmoid')
+
+        def call(self, preprocessed_text):
+            encoder_outputs = self.encoder(preprocessed_text)
+            pooled_output = encoder_outputs["pooled_output"]
+            x = self.dropout(pooled_output)
+            x = self.dense_int(x)
+            x = self.dropout(x)
+            x = self.dense_final(x)
+            return x
+
+    model = Classifier()
+
+    return model
 
 
+def train_model(strategy, X_train, y_train, X_val, y_val):
+    epochs = 1
+    batch_size = 128
+    init_lr = 3e-5
 
-def preprocess(df):
-    """method that pre-process the data"""
-    df["distance"] = compute_distance(df)
-    X_train = df[["distance"]]
-    y_train = df["fare_amount"]
-    return X_train, y_train
+    print(f'Fine tuning {tfhub_handle_encoder} model')
+    bert_preprocess_model = make_bert_preprocess_model()
+
+    with strategy.scope():
+
+        # Train dataset creation
+        train_dataset, train_data_size = load_dataset(X_train, y_train,
+                bert_preprocess_model, batch_size=batch_size, is_training=True)
+
+        steps_per_epoch = train_data_size // batch_size
+        num_train_steps = steps_per_epoch * epochs
+        num_warmup_steps = num_train_steps // 10
+
+        # Validation dataset creation
+        validation_dataset, validation_data_size = load_dataset(X_val, y_val,
+                bert_preprocess_model, batch_size=batch_size, is_training=False)
+
+        validation_steps = validation_data_size // batch_size
+
+        # Model creation
+        classifier_model = build_classifier_model()
+
+        # Metrics
+        METRICS = [
+            tf.keras.metrics.BinaryAccuracy(name='accuracy'),
+            tf.keras.metrics.Precision(name='precision'),
+            tf.keras.metrics.Recall(name='recall'),
+        ]
+
+        # Loss function
+        loss = tf.keras.losses.BinaryCrossentropy()
+
+        # Optimizer
+        optimizer = optimization.create_optimizer(
+            init_lr=init_lr,
+            num_train_steps=num_train_steps,
+            num_warmup_steps=num_warmup_steps,
+            optimizer_type='adamw')
+
+        # Compile
+        classifier_model.compile(optimizer=optimizer, loss=loss, metrics=METRICS)
+
+        # Training
+        es = tf.keras.callbacks.EarlyStopping(monitor='val_loss', mode='auto',
+                patience=4, restore_best_weights=True)
+
+        print("### Training ...")
+        history = classifier_model.fit(
+                    x=train_dataset,
+                    validation_data=validation_dataset,
+                    steps_per_epoch=steps_per_epoch,
+                    epochs=epochs,
+                    validation_steps=validation_steps,
+                    callbacks=[es])
+
+        print("### End of Training ...")
+
+        return classifier_model
 
 
-def train_model(X_train, y_train):
-    """method that trains the model"""
-    rgs = linear_model.Lasso(alpha=0.1)
-    rgs.fit(X_train, y_train)
-    print("trained model")
-    return rgs
+# def upload_model_to_gcp():
+#     client = storage.Client()
+#     bucket = client.bucket(BUCKET_NAME)
+#     blob = bucket.blob(STORAGE_LOCATION)
+#     blob.upload_from_filename('model.joblib')
 
 
-STORAGE_LOCATION = 'models/simpletaxifare/model.joblib'
+# def save_model(reg):
+#     """method that saves the model into a .joblib file and uploads it on Google Storage /models folder
+#     HINTS : use joblib library and google-cloud-storage"""
 
+#     # saving the trained model to disk is mandatory to then beeing able to upload it to storage
+#     # Implement here
+#     joblib.dump(reg, 'model.joblib')
+#     print("saved model.joblib locally")
 
-def upload_model_to_gcp():
-
-
-    client = storage.Client()
-
-    bucket = client.bucket(BUCKET_NAME)
-
-    blob = bucket.blob(STORAGE_LOCATION)
-
-    blob.upload_from_filename('model.joblib')
-
-
-def save_model(reg):
-    """method that saves the model into a .joblib file and uploads it on Google Storage /models folder
-    HINTS : use joblib library and google-cloud-storage"""
-
-    # saving the trained model to disk is mandatory to then beeing able to upload it to storage
-    # Implement here
-    joblib.dump(reg, 'model.joblib')
-    print("saved model.joblib locally")
-
-    # Implement here
-    upload_model_to_gcp()
-    print(f"uploaded model.joblib to gcp cloud storage under \n => {STORAGE_LOCATION}")
+#     # Implement here
+#     upload_model_to_gcp()
+#     print(f"uploaded model.joblib to gcp cloud storage under \n => {STORAGE_LOCATION}")
 
 
 if __name__ == '__main__':
+    # Init TPU
+    strategy = init_TPU()
+
     # get training data from GCP bucket
-    F_df = get_data_from_gcp(BUCKET_NAME, P_TRAIN_DATA_PATH)
-    F_df = get_data_from_gcp(BUCKET_NAME, P_TRAIN_DATA_PATH)
-    F_df = get_data_from_gcp(BUCKET_NAME, P_TRAIN_DATA_PATH)
-    F_df = get_data_from_gcp(BUCKET_NAME, P_TRAIN_DATA_PATH)
-    F_df = get_data_from_gcp(BUCKET_NAME, P_TRAIN_DATA_PATH)
+    X, y = get_data()
+
+    # train/val/test split
+    X_train, y_train, X_val, y_val, X_test, y_test = get_splits(X, y)
+
+    # Define model
+    tfhub_handle_encoder, tfhub_handle_preprocess = get_model_name(BERT_MODEL_NAME)
+
+    # train model on GCP (TPU required)
+    model = train_model(strategy, X_train, y_train, X_val, y_val)
 
 
-
-
-    # preprocess data
-    X_train, y_train = preprocess(df)
-
-    # train model (locally if this file was called through the run_locally command
-    # or on GCP if it was called through the gcp_submit_training, in which case
-    # this package is uploaded to GCP before being executed)
-    reg = train_model(X_train, y_train)
-
-    # save trained model to GCP bucket (whether the training occured locally or on GCP)
-    save_model(reg)
+    # # save trained model to GCP bucket (whether the training occured locally or on GCP)
+    # save_model(reg)
