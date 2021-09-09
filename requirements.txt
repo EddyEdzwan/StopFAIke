@@ -32,3 +32,8 @@ termcolor
 tldextract
 nltk==3.6.2
 bs4
+tensorflow_hub
+tensorflow_text
+tensorflow_addons
+tf-models-official
+
