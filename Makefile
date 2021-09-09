@@ -67,8 +67,6 @@ pypi:
 # LOCAL_PATH=/Users/julienseguy/code/EddyEdzwan/StopFAIke/raw_data/politifact_scrap.csv
 LOCAL_PATH=/Users/julienseguy/code/EddyEdzwan/StopFAIke/raw_data/poynter_final_condensed.csv
 
-
-
 # project id
 PROJECT_ID=le-wagon-data-bootcamp-321006
 
