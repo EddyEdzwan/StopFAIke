@@ -3,6 +3,9 @@ import pandas as pd
 
 import os
 import tensorflow as tf
+# AUTOTUNE = tf.data.AUTOTUNE
+AUTOTUNE = tf.data.experimental.AUTOTUNE
+
 import tensorflow_hub as hub
 import tensorflow_text as text
 import tensorflow_addons as tfa
@@ -43,7 +46,6 @@ def make_bert_preprocess_model():
     return tf.keras.Model(text_input, encoder_inputs)
 
 
-AUTOTUNE = tf.data.AUTOTUNE
 def load_dataset(X, y, bert_preprocess_model, batch_size=32, is_training=True):
 
     X = [np.array([item]) for item in X]
