@@ -47,7 +47,6 @@ def make_bert_preprocess_model():
 
 
 def load_dataset(X, y, bert_preprocess_model, batch_size=32, is_training=True):
-
     X = [np.array([item]) for item in X]
     dataset = tf.data.Dataset.from_tensor_slices((X, y))
     num_examples = len(X)
