@@ -26,6 +26,7 @@ MODEL_VERSION = 'v1'
 STORAGE_LOCATION = 'models/simpletaxifare/model.joblib'
 
 ### BERT Models - - - - - - - - - - - - - - - - - - - - - -
+BERT_MODEL_NAME = 'bert_en_uncased_L-12_H-768_A-12'
 
 map_name_to_handle = {
     'bert_en_uncased_L-12_H-768_A-12':
