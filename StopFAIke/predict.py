@@ -42,7 +42,7 @@ def get_model_from_gcp():
         Path(directory).mkdir(parents=True, exist_ok=True)
         blob.download_to_filename(blob.name)
 
-    # Load the model download from CGP
+    # Load the model downloaded locally from CGP
     reloaded_model = tf.saved_model.load(STORAGE_LOCATION)
     return reloaded_model
 
