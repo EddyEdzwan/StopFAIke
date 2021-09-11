@@ -23,7 +23,7 @@ MODEL_NAME = 'StopFAIke'
 # model version folder name (where the trained model.joblib file will be stored)
 MODEL_VERSION = 'v1'
 
-STORAGE_LOCATION = 'models/simpletaxifare/model.joblib'
+STORAGE_LOCATION = 'models/StopFAIke/bert_en_uncased_L-12_H-768_A-12'
 
 ### BERT Models - - - - - - - - - - - - - - - - - - - - - -
 BERT_MODEL_NAME = 'bert_en_uncased_L-12_H-768_A-12'

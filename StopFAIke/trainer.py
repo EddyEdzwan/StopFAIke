@@ -22,12 +22,12 @@ from StopFAIke.params import map_name_to_handle
 from StopFAIke.params import map_model_to_preprocess
 
 
-def init_TPU():
-    resolver = tf.distribute.cluster_resolver.TPUClusterResolver()
-    tf.config.experimental_connect_to_cluster(resolver)
-    tf.tpu.experimental.initialize_tpu_system(resolver)
-    strategy = tf.distribute.experimental.TPUStrategy(resolver)
-    return strategy
+# def init_TPU():
+#     resolver = tf.distribute.cluster_resolver.TPUClusterResolver()
+#     tf.config.experimental_connect_to_cluster(resolver)
+#     tf.tpu.experimental.initialize_tpu_system(resolver)
+#     strategy = tf.distribute.experimental.TPUStrategy(resolver)
+#     return strategy
 
 
 def get_model_name(BERT_MODEL_NAME):
@@ -168,22 +168,74 @@ def train_model(strategy, X_train, y_train, X_val, y_val):
 #     upload_model_to_gcp()
 #     print(f"uploaded model.joblib to gcp cloud storage under \n => {STORAGE_LOCATION}")
 
+def wait_for_tpu_cluster_resolver_ready():
+    """Waits for `TPUClusterResolver` to be ready and return it.
+
+    Returns:
+        A TPUClusterResolver if there is TPU machine (in TPU_CONFIG).
+        Otherwise, return None.
+    Raises:
+        RuntimeError: if failed to schedule TPU.
+    """
+    tpu_config_env = os.environ.get('TPU_CONFIG')
+    if not tpu_config_env:
+        tf.logging.info('Missing TPU_CONFIG, use CPU/GPU for training.')
+    return None
+
+    tpu_node = json.loads(tpu_config_env)
+    tf.logging.info('Waiting for TPU to be ready: \n%s.', tpu_node)
+
+    num_retries = 100
+    for i in range(num_retries):
+        try:
+            tpu_cluster_resolver = (
+                tf.contrib.cluster_resolver.TPUClusterResolver(
+                      tpu=[tpu_node['tpu_node_name']],
+                      zone=tpu_node['zone'],
+                      project=tpu_node['project'],
+                      job_name='worker'))
+            tpu_cluster_resolver_dict = tpu_cluster_resolver.cluster_spec().as_dict()
+            if 'worker' in tpu_cluster_resolver_dict:
+                tf.logging.info('Found TPU worker: %s', tpu_cluster_resolver_dict)
+            return tpu_cluster_resolver
+        except Exception as e:
+            if i < num_retries - 1:
+                tf.logging.info('Still waiting for provisioning of TPU VM instance.')
+            else:
+                # Preserves the traceback.
+                raise RuntimeError('Failed to schedule TPU: {}'.format(e))
+        time.sleep(10)
+
+    # Raise error when failed to get TPUClusterResolver after retry.
+    raise RuntimeError('Failed to schedule TPU.')
 
 if __name__ == '__main__':
+
+    wait_for_tpu_cluster_resolver_ready()
+
     # Init TPU
-    strategy = init_TPU()
+    print('###### Init TPU ######')
+    # resolver = tf.distribute.cluster_resolver.TPUClusterResolver()
+    # tf.config.experimental_connect_to_cluster(resolver)
+    # tf.tpu.experimental.initialize_tpu_system(resolver)
+    # strategy = tf.distribute.experimental.TPUStrategy(resolver)
+    print(f"strategy: {strategy}")
+    print('###### Using TPU ######')
+
+    # Init TPU
+    # strategy = init_TPU()
 
     # get training data from GCP bucket
-    X, y = get_data()
+    # X, y = get_data()
 
-    # train/val/test split
-    X_train, y_train, X_val, y_val, X_test, y_test = get_splits(X, y)
+    # # train/val/test split
+    # X_train, y_train, X_val, y_val, X_test, y_test = get_splits(X, y)
 
-    # Define model
-    tfhub_handle_encoder, tfhub_handle_preprocess = get_model_name(BERT_MODEL_NAME)
+    # # Define model
+    # tfhub_handle_encoder, tfhub_handle_preprocess = get_model_name(BERT_MODEL_NAME)
 
-    # train model on GCP (TPU required)
-    model = train_model(strategy, X_train, y_train, X_val, y_val)
+    # # train model on GCP (TPU required)
+    # model = train_model(strategy, X_train, y_train, X_val, y_val)
 
 
     # # save trained model to GCP bucket (whether the training occured locally or on GCP)

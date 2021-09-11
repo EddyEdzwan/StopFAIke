@@ -93,7 +93,7 @@ upload_data:
 
 ##### Training  - - - - - - - - - - - - - - - - - - - - - -
 # will store the packages uploaded to GCP for the training
-BUCKET_TRAINING_FOLDER = 'trainings'
+BUCKET_TRAINING_FOLDER = trainings
 
 ##### Model - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -101,9 +101,9 @@ BUCKET_TRAINING_FOLDER = 'trainings'
 
 ### GCP AI Platform - - - - - - - - - - - - - - - - - - - -
 ##### Machine configuration - - - - - - - - - - - - - - - -
-REGION=europe-west1
+REGION=us-central1
 PYTHON_VERSION=3.7
-RUNTIME_VERSION=1.15
+RUNTIME_VERSION=2.5
 
 ##### Package params  - - - - - - - - - - - - - - - - - - -
 PACKAGE_NAME=StopFAIke
@@ -123,7 +123,6 @@ gcp_submit_training:
 		--module-name ${PACKAGE_NAME}.${FILENAME} \
 		--python-version=${PYTHON_VERSION} \
 		--scale-tier=BASIC_TPU \
-		--distribution_strategy=tpu \
 		--runtime-version=${RUNTIME_VERSION} \
 		--region ${REGION} \
 		--stream-logs
