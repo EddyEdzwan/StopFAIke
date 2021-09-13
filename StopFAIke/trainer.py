@@ -55,8 +55,6 @@ class Trainer:
         self.epochs = epochs
         self.batch_size = batch_size
         self.init_lr = 3e-5
-        # self.X_train_preproc = None
-        # self.pipe = None
         self.classifier_model = None
         self.history = None
 
@@ -91,7 +89,7 @@ class Trainer:
         Traing BERT model on Google Colab
         """
 
-        print(f'###### Fine tuning {self.tfhub_handle_encoder} model')
+        print(f'###### Model training {self.tfhub_handle_encoder} model')
         self.strategy = get_strategy()
 
         self.bert_preprocess_model = make_bert_preprocess_model(self.tfhub_handle_preprocess)
@@ -215,10 +213,10 @@ class Trainer:
 if __name__ == '__main__':
 
     # Instanciate trainer with number of rows to download and use
-    trainer = Trainer()
+    trainer = Trainer(BERT_MODEL_NAME=BERT_MODEL_NAME, epochs=1, batch_size=32)
 
     # Load data with number of rows to download and use
-    trainer.load_data(rows=1_000)
+    trainer.load_data(nrows=1_000)
 
     # Clean data
     trainer.clean()
@@ -233,4 +231,4 @@ if __name__ == '__main__':
     trainer.evaluate_model(X_test=None, y_test=None)
 
     # Save model on Google Colab
-    trainer.save_model()
+    # trainer.save_model()

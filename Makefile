@@ -122,7 +122,7 @@ gcp_submit_training:
 		--package-path ${PACKAGE_NAME} \
 		--module-name ${PACKAGE_NAME}.${FILENAME} \
 		--python-version=${PYTHON_VERSION} \
-		--scale-tier=BASIC_TPU \
+		--scale-tier=BASIC_GPU \
 		--runtime-version=${RUNTIME_VERSION} \
 		--region ${REGION} \
 		--stream-logs
