@@ -9,6 +9,17 @@ nltk.download('punkt')
 nltk.download('stopwords')
 nltk.download('wordnet')
 
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import recall_score
+from sklearn.metrics import precision_score
+from sklearn.metrics import f1_score
+from sklearn.metrics import accuracy_score
+
+
 # TODO : include parameters to select Lemmatize, stop words ...
 def clean(text):
 
@@ -37,3 +48,79 @@ def clean(text):
     return ' '.join(word for word in words_only)
 
 
+def plot_loss(history, title=None):
+    fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(18, 4))
+    ax1.plot(history.history['loss'])
+    ax1.plot(history.history['val_loss'])
+    ax1.set_title('Model loss')
+    ax1.set_ylabel('Loss')
+    ax1.set_xlabel('Epoch')
+    ax1.set_ylim(ymin=0, ymax=1)
+    ax1.legend(['Train', 'Validation'], loc='best')
+
+    ax2.plot(history.history['accuracy'])
+    ax2.plot(history.history['val_accuracy'])
+    ax2.set_title('ACC')
+    ax2.set_ylabel('ACC')
+    ax2.set_xlabel('Epoch')
+    ax2.set_ylim(ymin=0, ymax=1)
+    ax2.legend(['Train', 'Validation'], loc='best')
+
+    ax3.plot(history.history['recall'])
+    ax3.plot(history.history['val_recall'])
+    ax3.set_title('Recall')
+    ax3.set_ylabel('Recall')
+    ax3.set_xlabel('Epoch')
+    ax3.set_ylim(ymin=0, ymax=1)
+    ax3.legend(['Train', 'Validation'], loc='best')
+    if title:
+        fig.suptitle(title)
+    plt.show()
+
+
+def binary_metrics(y_test, y_pred):
+    print('-'*80)
+    print('Acc: {:.2f}'.format(accuracy_score(y_test, y_pred)))
+    print('Recall: {:.2f}'.format(recall_score(y_test, y_pred)))
+    print('Precision: {:.2f}'.format(precision_score(y_test, y_pred)))
+    print('f1: {:.2f}'.format(f1_score(y_test, y_pred)))
+    print('-'*80)
+
+
+def get_metrics_ds(y_test, ds, model):
+    y_prob = model.predict(ds)
+    y_pred = np.where(y_prob > 0.5, 1, 0)
+
+    conf_matrix = confusion_matrix(y_test, y_pred)
+
+    acc = accuracy_score(y_test, y_pred)
+    recall = recall_score(y_test, y_pred)
+    precision = precision_score(y_test, y_pred)
+    f1 = f1_score(y_test, y_pred)
+
+    print('-'*80)
+    print(f"acc: {acc*100:.2f}%")
+    print(f"recall: {recall*100:.2f}%")
+    print(f"precision: {precision*100:.2f}%")
+    print(f"f1: {f1*100:.2f}%")
+    print('-'*80)
+
+    sns.heatmap(conf_matrix, annot=True, fmt="d");
+
+
+################
+#  DECORATORS  #
+################
+def simple_time_tracker(method):
+    def timed(*args, **kw):
+        ts = time.time()
+        result = method(*args, **kw)
+        te = time.time()
+        if 'log_time' in kw:
+            name = kw.get('log_name', method.__name__.upper())
+            kw['log_time'][name] = int(te - ts)
+        else:
+            print(method.__name__, round(te - ts, 2))
+        return result
+
+    return timed
