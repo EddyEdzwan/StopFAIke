@@ -211,3 +211,26 @@ class Trainer:
 #     # Implement here
 #     upload_model_to_gcp()
 #     print(f"uploaded model.joblib to gcp cloud storage under \n => {STORAGE_LOCATION}")
+
+if __name__ == '__main__':
+
+    # Instanciate trainer with number of rows to download and use
+    trainer = Trainer()
+
+    # Load data with number of rows to download and use
+    trainer.load_data(rows=1_000)
+
+    # Clean data
+    trainer.clean()
+
+    # Create train/test/split
+    trainer.preproc(valtest_size=0.3)
+
+    # Train BERT model and show training performance
+    trainer.train_model(plot_history=True)
+
+    # Evaluate on test set (by default the holdout from train/test/split)
+    trainer.evaluate_model(X_test=None, y_test=None)
+
+    # Save model on Google Colab
+    trainer.save_model()
