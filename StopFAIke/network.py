@@ -23,6 +23,6 @@ def build_classifier_model(tfhub_handle_encoder):
             x = self.dense_final(x)
             return x
 
-    model = Classifier()
+    model = Classifier(tfhub_handle_encoder)
 
     return model

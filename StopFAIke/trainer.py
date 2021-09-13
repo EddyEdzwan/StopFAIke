@@ -23,6 +23,7 @@ from StopFAIke.params import map_name_to_handle
 from StopFAIke.params import map_model_to_preprocess
 
 from StopFAIke.preprocessor import get_model_name
+from StopFAIke.preprocessor import get_strategy
 from StopFAIke.preprocessor import make_bert_preprocess_model
 from StopFAIke.preprocessor import load_dataset
 
@@ -65,11 +66,15 @@ class Trainer:
 
         # self.pipe = create_pipeline()
         # self.X_train_preproc = self.pipe.fit_transform(self.X_train)
-        print(
-            "###### shape of X_train, y_train: ",
-            self.X_train.shape,
-            self.y_train.shape,
-        )
+        print("###### shape of X_train, y_train:")
+        print(f"X_train shape: {self.X_train.shape}")
+        print(f"y_train shape: {self.y_train.shape}")
+        print("###### shape of X_val, y_train:")
+        print(f"X_train shape: {self.X_val.shape}")
+        print(f"X_train shape: {self.X_val.shape}")
+        print("###### shape of X_train, y_train:")
+        print(f"X_test shape: {self.X_test.shape}")
+        print(f"X_test shape: {self.X_test.shape}")
 
     # @simple_time_tracker
     # def fit(self, plot_history=True, verbose=1):
@@ -91,6 +96,8 @@ class Trainer:
 
     def train_model(self):
         print(f'###### Fine tuning {self.tfhub_handle_encoder} model')
+        self.strategy = get_strategy()
+
         self.bert_preprocess_model = make_bert_preprocess_model(self.tfhub_handle_preprocess)
 
         with self.strategy.scope():
