@@ -85,26 +85,12 @@ class Trainer:
         print(f"###### shape of X_test, y_test: {self.X_test.shape, self.y_test.shape}")
         print('-'*80)
 
-    # @simple_time_tracker
-    # def fit(self, plot_history=True, verbose=1):
-    #     print("###### fitting...")
-    #     # TensorFlow cannot work with Sparse Matrix out of Sklearn's OHE
-    #     self.X_train_preproc = self.X_train_preproc.todense()
-    #     self.network = Network(input_dim=self.X_train_preproc.shape[1])
-    #     print(self.network.model.summary())
-    #     self.network.compile_model()
-    #     self.history = self.network.fit_model(
-    #         self.X_train_preproc, self.y_train, verbose=verbose
-    #     )
-
-    #     # Print & plot some key training results
-    #     print("####### min val MAE", min(self.history.history["val_mae"]))
-    #     print("####### epochs reached", len(self.history.epoch))
-    #     if plot_history:
-    #         plot_model_history(self.history)
-
     @simple_time_tracker
     def train_model(self, plot_history=True):
+        """
+        Traing BERT model on Google Colab
+        """
+
         print(f'###### Fine tuning {self.tfhub_handle_encoder} model')
         self.strategy = get_strategy()
 
@@ -187,17 +173,20 @@ class Trainer:
 
     @simple_time_tracker
     def save_model(self):
+        """
+        Saving model to Google Colab
+        """
         main_save_path = './my_models'
         saved_model_name = 'my_bert_model'
 
         saved_model_path = os.path.join(main_save_path, saved_model_name)
 
-        preprocess_inputs = bert_preprocess_model.inputs
-        bert_encoder_inputs = bert_preprocess_model(preprocess_inputs)
-        bert_outputs = classifier_model(bert_encoder_inputs)
+        preprocess_inputs = self.bert_preprocess_model.inputs
+        bert_encoder_inputs = self.bert_preprocess_model(preprocess_inputs)
+        bert_outputs = self.classifier_model(bert_encoder_inputs)
         model_for_export = tf.keras.Model(preprocess_inputs, bert_outputs)
 
-        print('###### saving....', saved_model_path)
+        print('###### saving model....', saved_model_path)
         # Save everything on the Colab host (even the variables from TPU memory)
         save_options = tf.saved_model.SaveOptions(experimental_io_device='/job:localhost')
         model_for_export.save(saved_model_path, include_optimizer=False, options=save_options)
@@ -222,7 +211,3 @@ class Trainer:
 #     # Implement here
 #     upload_model_to_gcp()
 #     print(f"uploaded model.joblib to gcp cloud storage under \n => {STORAGE_LOCATION}")
-
-
-if __name__ == '__main__':
-
