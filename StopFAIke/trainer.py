@@ -146,7 +146,7 @@ class Trainer:
             print("### Training ...")
             self.history = self.classifier_model.fit(
                         x=self.train_dataset,
-                        validation_data=validation_dataset,
+                        validation_data=self.validation_dataset,
                         steps_per_epoch=steps_per_epoch,
                         epochs=self.epochs,
                         validation_steps=validation_steps,
