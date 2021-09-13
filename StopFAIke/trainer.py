@@ -31,7 +31,7 @@ from StopFAIke.network import build_classifier_model
 
 
 class Trainer:
-    def __init__(self, nrows=1_000, BERT_MODEL_NAME=BERT_MODEL_NAME):
+    def __init__(self, nrows=1_000, BERT_MODEL_NAME=BERT_MODEL_NAME, epochs=1, batch_size=32):
         self.X = get_data(nrows=nrows)[0]
         self.y = get_data(nrows=nrows)[1]
         self.X_train = None
@@ -47,8 +47,8 @@ class Trainer:
         self.train_dataset = None
         self.val_dataset = None
         self.test_dataset = None
-        self.epochs = 1
-        self.batch_size = 128
+        self.epochs = epochs
+        self.batch_size = batch_size
         self.init_lr = 3e-5
         # self.X_train_preproc = None
         # self.pipe = None
@@ -175,46 +175,6 @@ class Trainer:
 #     upload_model_to_gcp()
 #     print(f"uploaded model.joblib to gcp cloud storage under \n => {STORAGE_LOCATION}")
 
-# def wait_for_tpu_cluster_resolver_ready():
-#     """Waits for `TPUClusterResolver` to be ready and return it.
-
-#     Returns:
-#         A TPUClusterResolver if there is TPU machine (in TPU_CONFIG).
-#         Otherwise, return None.
-#     Raises:
-#         RuntimeError: if failed to schedule TPU.
-#     """
-#     tpu_config_env = os.environ.get('TPU_CONFIG')
-#     if not tpu_config_env:
-#         tf.logging.info('Missing TPU_CONFIG, use CPU/GPU for training.')
-#     return None
-
-#     tpu_node = json.loads(tpu_config_env)
-#     tf.logging.info('Waiting for TPU to be ready: \n%s.', tpu_node)
-
-#     num_retries = 100
-#     for i in range(num_retries):
-#         try:
-#             tpu_cluster_resolver = (
-#                 tf.contrib.cluster_resolver.TPUClusterResolver(
-#                       tpu=[tpu_node['tpu_node_name']],
-#                       zone=tpu_node['zone'],
-#                       project=tpu_node['project'],
-#                       job_name='worker'))
-#             tpu_cluster_resolver_dict = tpu_cluster_resolver.cluster_spec().as_dict()
-#             if 'worker' in tpu_cluster_resolver_dict:
-#                 tf.logging.info('Found TPU worker: %s', tpu_cluster_resolver_dict)
-#             return tpu_cluster_resolver
-#         except Exception as e:
-#             if i < num_retries - 1:
-#                 tf.logging.info('Still waiting for provisioning of TPU VM instance.')
-#             else:
-#                 # Preserves the traceback.
-#                 raise RuntimeError('Failed to schedule TPU: {}'.format(e))
-#         time.sleep(10)
-
-#     # Raise error when failed to get TPUClusterResolver after retry.
-#     raise RuntimeError('Failed to schedule TPU.')
 
 if __name__ == '__main__':
 
