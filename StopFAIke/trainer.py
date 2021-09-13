@@ -55,13 +55,13 @@ class Trainer:
         self.history = None
 
     def clean(self):
-        print("###### loading and cleaning....")
+        print("###### cleaning....")
         self.X = clean_data(self.X, self.y)[0]
         self.y = clean_data(self.X, self.y)[1]
 
     def preproc(self, valtest_size=0.3):
         print("###### preprocessing....")
-        self.X_train, self.y_train, self.X_val, self.y_val = self.X_test, self.y_test = get_splits(self.X, self.y, valtest_size=valtest_size)
+        self.X_train, self.y_train, self.X_val, self.y_val, self.X_test, self.y_test = get_splits(self.X, self.y, valtest_size=valtest_size)
 
         # self.pipe = create_pipeline()
         # self.X_train_preproc = self.pipe.fit_transform(self.X_train)
@@ -70,7 +70,6 @@ class Trainer:
             self.X_train.shape,
             self.y_train.shape,
         )
-
 
     # @simple_time_tracker
     # def fit(self, plot_history=True, verbose=1):
@@ -90,22 +89,9 @@ class Trainer:
     #     if plot_history:
     #         plot_model_history(self.history)
 
-
-
-
-
-
-
-
-
-
     def train_model(self):
-        # epochs = 1
-        # batch_size = 128
-        # init_lr = 3e-5
-
         print(f'###### Fine tuning {self.tfhub_handle_encoder} model')
-        self.bert_preprocess_model = make_bert_preprocess_model()
+        self.bert_preprocess_model = make_bert_preprocess_model(self.tfhub_handle_preprocess)
 
         with self.strategy.scope():
 
