@@ -8,6 +8,8 @@ from google.cloud import storage
 
 from StopFAIke.params import BUCKET_NAME, STORAGE_LOCATION
 
+from StopFAIke.utils import clean
+
 # root_dir = os.path.dirname(os.path.dirname(__file__))
 # LOCAL_PATH = os.path.join(root_dir, "raw_data", "test.csv")
 
@@ -39,26 +41,25 @@ if __name__ == '__main__':
     reloaded_model = get_model_from_gcp(local=True)
     print("#### Model uploaded ...")
 
-    # print("#### Predictions ...")
+    print("#### Predictions ...")
+
+    text_samples = ["The FBI raided a “Cleveland office linked to Ukraine. Biden, Pelosi, \
+        Kerry and Romney all had sons getting tens of millions of dollars \
+        from no-show jobs in Ukraine.”",
+        "Says the U.S. Senate is “dominated by millionaires” and that he \
+        is “not one of them.”", "Says Kamala Harris called Joe Biden “a \
+        racist” during a Democratic presidential debate.",
+        "Donald Trump says he will ‘terminate’ Social Security if \
+        re-elected.",
+        "Say Joe Biden is a pedophile."]
+
+    label_samples = ['fake', 'true', 'fake', 'fake', 'fake']
     # samples = ['Julien is 43yo',
     #            'Nina and Fleur are the daughters of Julien',
     #            'Trump president']
 
-    # for sample in samples:
-    #     y_prob = reloaded_model([sample])
-    #     print(f"Pred: {y_prob.numpy()[0][0]:.3f} - {sample} ")
+    for text_, label_ in zip(text_samples, label_samples):
+        text_ = clean(text_)
+        y_prob = reloaded_model([text_])
+        print(f"Label: {label_} - Pred: {y_prob.numpy()[0][0]:.3f} - {text_[:100]}... ")
 
-    # print("#### Predictions ...")
-    # sample = ['Julien is 43yo']
-
-    # y_prob = reloaded_model(sample)
-    # print(f"Pred: {y_prob.numpy()[0][0]:.3f} - {sample} ")
-
-    print("#### Predictions ...")
-    sample = 'Julien is 43yo'
-    X = dict(text=[sample])
-
-    # Make prediction
-    y_prob = reloaded_model(X['text'])
-    # print(f"Pred: {y_prob.numpy()[0][0]:.3f} - {X['text']} ")
-    print(f"Pred: {y_prob} - {X['text']} ")
