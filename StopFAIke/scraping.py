@@ -3,13 +3,14 @@ from bs4 import BeautifulSoup
 import numpy as np
 import pandas as pd
 import requests
+import os
 import urllib.request
 import time
 
 def scrape_politifact(start_page, end_page, verbose = True):
 
-    '''Function to scrape Politifact's list of latest fact-checks - https://www.politifact.com/factchecks/list/
-    over given pages between start_page and end_page.
+    '''Function to scrape Politifact's list of latest fact-checks
+    over given pages between start_page and end_page (https://www.politifact.com/factchecks/list/).
     
     Returns a DataFrame of
     (i) the fact-check's author,
@@ -85,8 +86,7 @@ def scrape_politifact(start_page, end_page, verbose = True):
 def scrape_poynter(start_page, end_page, verbose=True):
 
     '''Function to scrape Poynter's list of latest COVID related fact-checks and its related explanation why it is labelled as such
-    - https://www.poynter.org/ifcn-covid-19-misinformation/page/
-    over given pages between start_page and end_page.
+    over given pages between start_page and end_page (https://www.poynter.org/ifcn-covid-19-misinformation/page/).
     
     Returns two DataFrames:
     DataFrame 1
@@ -174,4 +174,24 @@ def scrape_poynter(start_page, end_page, verbose=True):
             true_explanation_list.append(true_explanation)
 
     return pd.DataFrame(dict([('source', source_list), ('date', date_list), ('country', country_list),
-      ('label',label_list),('title',title_list)])), pd.DataFrame(dict([('true_explanation',true_explanation_list)]))
+      ('label',label_list),('title',title_list)])), \
+      pd.DataFrame(dict([('true_explanation',true_explanation_list)]))
+
+if __name__ == '__main__':
+
+    #Change the start_page & end_page here in order to scrape additional pages from either Politifact or Poynter
+    politifact_df = scrape_politifact(1,1, verbose=False)
+    poynter_df, poynter_df_2 = scrape_poynter(1,1, verbose=False)
+
+    file_directory = os.path.join(os.getcwd(), 'data')
+
+    try:
+        politifact_df.to_csv(os.path.join(file_directory, 'politifact_test.csv'))
+    except FileNotFoundError:
+        os.mkdir(file_directory)
+        politifact_df.to_csv(os.path.join(file_directory, 'politifact_test.csv'))
+    finally:
+        poynter_df.to_csv(os.path.join(file_directory, 'poynter_test.csv'))
+        poynter_df_2.to_csv(os.path.join(file_directory, 'poynter_2_test.csv'))
+
+    print(f'Scraped information have been saved on {file_directory}')
