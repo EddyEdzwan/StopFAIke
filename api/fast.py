@@ -1,5 +1,4 @@
 import numpy as np
-import pandas as pd
 
 import tensorflow as tf
 import tensorflow_text as text
@@ -29,21 +28,12 @@ def index():
 
 
 @app.get("/predict")
-def predict(text):
+def predict(article):
 
-    X = dict(text=[text])
+    X = dict(article=[article])
 
-    # X = pd.DataFrame(dict(text=[text]))
+    y_prob = reloaded_model(X['article'])
 
-    # Process the input as list
-    # X = [text]
+    print(f"Probability (0 (True) - 1 (Fake)): {np.round(y_prob.numpy()[0][0], 3)}")
 
-    # Get the model (locally or from GCP)
-    # reloaded_model = get_model_from_gcp(local=True)
-
-    # Make prediction
-    # y_prob = reloaded_model(X['text'].values.tolist())
-
-    y_prob = reloaded_model(X['text'])
-
-    return {'prediction': y_prob}
+    return {'prediction': float(y_prob.numpy()[0][0])}

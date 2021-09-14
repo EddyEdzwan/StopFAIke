@@ -190,26 +190,6 @@ class Trainer:
         model_for_export.save(saved_model_path, include_optimizer=False, options=save_options)
 
 
-# def upload_model_to_gcp():
-#     client = storage.Client()
-#     bucket = client.bucket(BUCKET_NAME)
-#     blob = bucket.blob(STORAGE_LOCATION)
-#     blob.upload_from_filename('model.joblib')
-
-
-# def save_model(reg):
-#     """method that saves the model into a .joblib file and uploads it on Google Storage /models folder
-#     HINTS : use joblib library and google-cloud-storage"""
-
-#     # saving the trained model to disk is mandatory to then beeing able to upload it to storage
-#     # Implement here
-#     joblib.dump(reg, 'model.joblib')
-#     print("saved model.joblib locally")
-
-#     # Implement here
-#     upload_model_to_gcp()
-#     print(f"uploaded model.joblib to gcp cloud storage under \n => {STORAGE_LOCATION}")
-
 if __name__ == '__main__':
 
     # Instanciate trainer with number of rows to download and use
