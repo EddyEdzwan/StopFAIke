@@ -141,3 +141,10 @@ gcp_submit_training:
 #   --distribution_strategy=tpu \
 #   --data_dir=gs://tfds-data/datasets \
 #   --model_dir=gs://BUCKET_NAME/tpu_mnist_1_output
+
+
+
+##### Prediction API - - - - - - - - - - - - - - - - - - - - - - - - -
+
+run_api:
+	uvicorn api.fast:app --reload  # load web server with code autoreload

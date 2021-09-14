@@ -1,3 +1,5 @@
+import pandas as pd
+
 import tensorflow as tf
 import tensorflow_text as text
 
@@ -37,11 +39,27 @@ if __name__ == '__main__':
     reloaded_model = get_model_from_gcp(local=True)
     print("#### Model uploaded ...")
 
-    print("#### Predictions ...")
-    samples = ['Julien is 43yo',
-               'Nina and Fleur are the daughters of Julien',
-               'Trump president']
+    # print("#### Predictions ...")
+    # samples = ['Julien is 43yo',
+    #            'Nina and Fleur are the daughters of Julien',
+    #            'Trump president']
 
-    for sample in samples:
-        y_prob = reloaded_model([sample])
-        print(f"Pred: {y_prob.numpy()[0][0]:.3f} - {sample} ")
+    # for sample in samples:
+    #     y_prob = reloaded_model([sample])
+    #     print(f"Pred: {y_prob.numpy()[0][0]:.3f} - {sample} ")
+
+    # print("#### Predictions ...")
+    # sample = ['Julien is 43yo']
+
+    # y_prob = reloaded_model(sample)
+    # print(f"Pred: {y_prob.numpy()[0][0]:.3f} - {sample} ")
+
+    print("#### Predictions ...")
+    X = pd.DataFrame(dict(text=['Julien is 43yo']))
+
+    # Get the model (locally or from GCP)
+    reloaded_model = get_model_from_gcp(local=True)
+
+    # Make prediction
+    y_prob = reloaded_model(X['text'].values.tolist())
+    print(f"Pred: {y_prob.numpy()[0][0]:.3f} - {X['text'].values.tolist()} ")
