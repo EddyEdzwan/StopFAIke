@@ -11,7 +11,7 @@ import tensorflow_text as text
 import tensorflow_addons as tfa
 from official.nlp import optimization
 
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 from google.cloud import storage
 
@@ -20,19 +20,19 @@ from StopFAIke.data import clean_data
 from StopFAIke.data import get_splits
 
 from StopFAIke.params import BERT_MODEL_NAME
-from StopFAIke.params import map_name_to_handle
-from StopFAIke.params import map_model_to_preprocess
+# from StopFAIke.params import map_name_to_handle
+# from StopFAIke.params import map_model_to_preprocess
 
 from StopFAIke.preprocessor import get_model_name
 from StopFAIke.preprocessor import get_strategy
 from StopFAIke.preprocessor import make_bert_preprocess_model
 from StopFAIke.preprocessor import load_dataset
 
+from StopFAIke.network import build_classifier_model
+
 from StopFAIke.utils import simple_time_tracker
 from StopFAIke.utils import plot_loss
 from StopFAIke.utils import get_metrics_ds
-
-from StopFAIke.network import build_classifier_model
 
 
 class Trainer:
@@ -86,7 +86,7 @@ class Trainer:
     @simple_time_tracker
     def train_model(self, plot_history=True):
         """
-        Traing BERT model on Google Colab
+        Traing BERT model on Google Colab (TPU strongly recommended)
         """
 
         print(f'###### Model training {self.tfhub_handle_encoder} model')
