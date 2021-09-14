@@ -55,11 +55,10 @@ if __name__ == '__main__':
     # print(f"Pred: {y_prob.numpy()[0][0]:.3f} - {sample} ")
 
     print("#### Predictions ...")
-    X = pd.DataFrame(dict(text=['Julien is 43yo']))
-
-    # Get the model (locally or from GCP)
-    reloaded_model = get_model_from_gcp(local=True)
+    sample = 'Julien is 43yo'
+    X = dict(text=[sample])
 
     # Make prediction
-    y_prob = reloaded_model(X['text'].values.tolist())
-    print(f"Pred: {y_prob.numpy()[0][0]:.3f} - {X['text'].values.tolist()} ")
+    y_prob = reloaded_model(X['text'])
+    # print(f"Pred: {y_prob.numpy()[0][0]:.3f} - {X['text']} ")
+    print(f"Pred: {y_prob} - {X['text']} ")

@@ -1,17 +1,15 @@
-# import numpy as np
 import pandas as pd
 
-# from google.cloud import storage
+from sklearn.model_selection import train_test_split
 
 from StopFAIke.utils import clean
+
 from StopFAIke.params import BUCKET_NAME
 from StopFAIke.params import P_TRAIN_DATA_PATH
 from StopFAIke.params import FNN_TRAIN_DATA_PATH
 from StopFAIke.params import BIS_T_TRAIN_DATA_PATH
 from StopFAIke.params import BIS_F_TRAIN_DATA_PATH
 from StopFAIke.params import PO_TRAIN_DATA_PATH
-
-from sklearn.model_selection import train_test_split
 
 # path = 'https://storage.googleapis.com/wagon-data-615-seguy/data/politifact_scrap.csv'
 # path = 'https://storage.googleapis.com/wagon-data-615-seguy/data/FakesNewsNET.csv'

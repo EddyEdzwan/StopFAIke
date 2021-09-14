@@ -1,8 +1,6 @@
 import numpy as np
 
 import tensorflow as tf
-AUTOTUNE = tf.data.experimental.AUTOTUNE
-
 import tensorflow_hub as hub
 import tensorflow_text as text
 import tensorflow_addons as tfa
@@ -10,6 +8,8 @@ import tensorflow_addons as tfa
 from StopFAIke.params import BERT_MODEL_NAME
 from StopFAIke.params import map_name_to_handle
 from StopFAIke.params import map_model_to_preprocess
+
+AUTOTUNE = tf.data.experimental.AUTOTUNE
 
 
 def get_strategy():

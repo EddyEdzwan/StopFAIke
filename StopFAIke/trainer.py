@@ -1,17 +1,15 @@
+
+import os
+
 import numpy as np
 import pandas as pd
 
-import os
 import tensorflow as tf
-# AUTOTUNE = tf.data.AUTOTUNE
-AUTOTUNE = tf.data.experimental.AUTOTUNE
-
-import tensorflow_hub as hub  # noqa: E402
+import tensorflow_hub as hub
 import tensorflow_text as text
 import tensorflow_addons as tfa
-from official.nlp import optimization
 
-# import matplotlib.pyplot as plt
+from official.nlp import optimization
 
 from google.cloud import storage
 
@@ -33,6 +31,8 @@ from StopFAIke.network import build_classifier_model
 from StopFAIke.utils import simple_time_tracker
 from StopFAIke.utils import plot_loss
 from StopFAIke.utils import get_metrics_ds
+
+AUTOTUNE = tf.data.experimental.AUTOTUNE    # (AUTOTUNE = tf.data.AUTOTUNE)
 
 
 class Trainer:

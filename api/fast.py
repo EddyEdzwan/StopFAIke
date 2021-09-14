@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 
 import tensorflow as tf
@@ -18,12 +19,19 @@ app.add_middleware(
     allow_headers=["*"],  # Allows all headers
 )
 
+# Get the model (locally or from GCP)
+reloaded_model = get_model_from_gcp(local=True)
+
+
 @app.get("/")
 def index():
-    return {"greeting": "Hello world"}
+    return {'message': 'This is StopFAIke API!'}
+
 
 @app.get("/predict")
 def predict(text):
+
+    X = dict(text=[text])
 
     # X = pd.DataFrame(dict(text=[text]))
 
@@ -31,11 +39,11 @@ def predict(text):
     # X = [text]
 
     # Get the model (locally or from GCP)
-    reloaded_model = get_model_from_gcp(local=True)
+    # reloaded_model = get_model_from_gcp(local=True)
 
     # Make prediction
     # y_prob = reloaded_model(X['text'].values.tolist())
 
-    y_prob = reloaded_model([text])
+    y_prob = reloaded_model(X['text'])
 
     return {'prediction': y_prob}
