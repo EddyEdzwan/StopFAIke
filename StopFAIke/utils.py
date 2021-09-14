@@ -22,8 +22,18 @@ from sklearn.metrics import f1_score
 from sklearn.metrics import accuracy_score
 
 
-# TODO : include parameters to select Lemmatize, stop words ...
 def clean(text):
+    """
+    Cleaning data:
+    - Remove Punctuation
+    - Lower Case
+    - Tokenization
+    - Remove numbers
+    - Remove stopwords
+    - Lemmatization
+
+    TODO : include parameters to select Lemmatize, stop words ...
+    """
 
     # Remove Punctuation
     for punctuation in string.punctuation:
@@ -51,6 +61,9 @@ def clean(text):
 
 
 def plot_loss(history, title=None):
+    """
+    Plotting history model training
+    """
     fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(18, 4))
     ax1.plot(history.history['loss'])
     ax1.plot(history.history['val_loss'])
@@ -81,6 +94,9 @@ def plot_loss(history, title=None):
 
 
 def binary_metrics(y_test, y_pred):
+    """
+    Get binary binary_metrics
+    """
     print('-'*80)
     print('Acc: {:.2f}'.format(accuracy_score(y_test, y_pred)))
     print('Recall: {:.2f}'.format(recall_score(y_test, y_pred)))
@@ -90,6 +106,9 @@ def binary_metrics(y_test, y_pred):
 
 
 def get_metrics_ds(y_test, ds, model):
+    """
+    Get metrics for model evaluation on test set
+    """
     y_prob = model.predict(ds)
     y_pred = np.where(y_prob > 0.5, 1, 0)
 

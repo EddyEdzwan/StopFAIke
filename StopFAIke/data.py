@@ -22,12 +22,17 @@ from sklearn.model_selection import train_test_split
 
 
 def get_data_from_gcp(BUCKET_NAME, BUCKET_TRAIN_DATA_PATH):
-    """method to get the training data (or a portion of it) from GCP"""
+    """
+    Method to get the training data from GCP
+    """
     df = pd.read_csv(f"gs://{BUCKET_NAME}/{BUCKET_TRAIN_DATA_PATH}")
     return df
 
 
 def preprocess_bisaillon(true_df, fake_df):
+    """
+    Merge Nisaillon datsets (true + fake)
+    """
     true_df.drop_duplicates(inplace=True)
     fake_df.drop_duplicates(inplace=True)
 
@@ -37,6 +42,13 @@ def preprocess_bisaillon(true_df, fake_df):
 
 
 def get_data(nrows=100_000):
+    """
+    Get all datasets (4) in once:
+    - Politifact dataset: scrapped
+    - FakeNewsNET: github repository
+    - Bisaillon: Kaggle
+    - Poynter: scrapped
+    """
     # Politifact
     P_df = get_data_from_gcp(BUCKET_NAME, P_TRAIN_DATA_PATH)
     X_P = P_df['statement'].copy()
@@ -67,12 +79,17 @@ def get_data(nrows=100_000):
 
 
 def clean_data(X, y):
+    """
+    Apply cleaning to dataset
+    """
     X_clean = X.apply(clean)
     return X_clean, y
 
 
 def get_splits(X, y, valtest_size=0.3):
-    """method to split data in Train/Val/Test"""
+    """
+    Method to split data in Train/Val/Test
+    """
     X_train, X_valtest, y_train, y_valtest = train_test_split(X, y, test_size=valtest_size, random_state=42)
     X_val, X_test, y_val, y_test = train_test_split(X_valtest, y_valtest, test_size=0.5, random_state=42)
     return X_train, y_train, X_val, y_val, X_test, y_test

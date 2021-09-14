@@ -6,6 +6,12 @@ import tensorflow_addons as tfa
 
 
 def build_classifier_model(tfhub_handle_encoder):
+    """
+    Build BERT model:
+    - BERT encoder
+    - Dedicated dense layers on top.
+    """
+
     class Classifier(tf.keras.Model):
         def __init__(self, tfhub_handle_encoder):
             super(Classifier, self).__init__(name="prediction")

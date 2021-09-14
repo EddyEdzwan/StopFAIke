@@ -13,6 +13,12 @@ from StopFAIke.params import map_model_to_preprocess
 
 
 def get_strategy():
+    """
+    Define strategy for model training:
+    - TPU strongly recommanded
+    - GPU very slow (1hr/epoch on full dataset)
+    - CPU not recommended
+    """
     if tf.config.list_logical_devices('TPU'):
         cluster_resolver = tf.distribute.cluster_resolver.TPUClusterResolver(tpu='')
         tf.config.experimental_connect_to_cluster(cluster_resolver)
@@ -29,12 +35,20 @@ def get_strategy():
 
 
 def get_model_name(BERT_MODEL_NAME=BERT_MODEL_NAME):
+    """
+    Define BERT model:
+    - Preprocessing
+    - Encoder
+    """
     tfhub_handle_preprocess = map_model_to_preprocess[BERT_MODEL_NAME]
     tfhub_handle_encoder = map_name_to_handle[BERT_MODEL_NAME]
     return tfhub_handle_preprocess, tfhub_handle_encoder
 
 
 def make_bert_preprocess_model(tfhub_handle_preprocess):
+    """
+    Returns Keras Model to BERT inputs
+    """
     text_input = tf.keras.layers.Input(shape=(), dtype=tf.string, name='text')
     preprocessing_layer = hub.KerasLayer(tfhub_handle_preprocess, name='preprocessing')
     encoder_inputs = preprocessing_layer(text_input)
@@ -42,6 +56,9 @@ def make_bert_preprocess_model(tfhub_handle_preprocess):
 
 
 def load_dataset(X, y, bert_preprocess_model, batch_size=32, is_training=True):
+    """
+    Datasets creation
+    """
     X = [np.array([item]) for item in X]
     dataset = tf.data.Dataset.from_tensor_slices((X, y))
     num_examples = len(X)
