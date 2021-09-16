@@ -90,6 +90,7 @@ class Trainer:
         """
 
         print(f'###### Model training {self.tfhub_handle_encoder} model')
+
         self.strategy = define_strategy()
 
         self.bert_preprocess_model = make_bert_preprocess_model(self.tfhub_handle_preprocess)
@@ -170,24 +171,28 @@ class Trainer:
         get_metrics_ds(y_test, self.test_dataset, self.classifier_model)
 
     @simple_time_tracker
-    def save_model(self):
+    def save_model(self, prefix='simple'):
         """
         Saving model to Google Colab
         """
-        main_save_path = './my_models'
-        saved_model_name = 'my_bert_model'
+        # main_save_path = './my_models'
+        # saved_model_name = 'my_bert_model'
 
-        saved_model_path = os.path.join(main_save_path, saved_model_name)
+        prefix = prefix
+        bert_type = BERT_MODEL_NAME
+        saved_model_name = f'{prefix}_{bert_type}'
+
+        # saved_model_path = os.path.join(main_save_path, saved_model_name)
 
         preprocess_inputs = self.bert_preprocess_model.inputs
         bert_encoder_inputs = self.bert_preprocess_model(preprocess_inputs)
         bert_outputs = self.classifier_model(bert_encoder_inputs)
         model_for_export = tf.keras.Model(preprocess_inputs, bert_outputs)
 
-        print('###### saving model....', saved_model_path)
+        print('###### saving model....', saved_model_name)
         # Save everything on the Colab host (even the variables from TPU memory)
         save_options = tf.saved_model.SaveOptions(experimental_io_device='/job:localhost')
-        model_for_export.save(saved_model_path, include_optimizer=False, options=save_options)
+        model_for_export.save(saved_model_name, include_optimizer=False, options=save_options)
 
 
 if __name__ == '__main__':
@@ -211,4 +216,15 @@ if __name__ == '__main__':
     trainer.evaluate_model(X_test=None, y_test=None)
 
     # Save model on Google Colab
-    # trainer.save_model()
+    trainer.save_model()
+
+    # import warnings
+    # warnings.simplefilter(action='ignore', category=FutureWarning)
+
+    # from termcolor import colored
+    # print(colored("############  Training model   ############", "red"))
+    # t.train()
+    # print(colored("############  Evaluating model ############", "blue"))
+    # t.evaluate()
+    # print(colored("############   Saving model    ############", "green"))
+    # t.save_model()
