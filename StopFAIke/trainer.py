@@ -22,7 +22,7 @@ from StopFAIke.params import BERT_MODEL_NAME
 # from StopFAIke.params import map_model_to_preprocess
 
 from StopFAIke.preprocessor import get_model_name
-from StopFAIke.preprocessor import get_strategy
+from StopFAIke.preprocessor import define_strategy
 from StopFAIke.preprocessor import make_bert_preprocess_model
 from StopFAIke.preprocessor import load_dataset
 
@@ -90,7 +90,7 @@ class Trainer:
         """
 
         print(f'###### Model training {self.tfhub_handle_encoder} model')
-        self.strategy = get_strategy()
+        self.strategy = define_strategy()
 
         self.bert_preprocess_model = make_bert_preprocess_model(self.tfhub_handle_preprocess)
 

@@ -12,24 +12,60 @@ from StopFAIke.params import map_model_to_preprocess
 AUTOTUNE = tf.data.experimental.AUTOTUNE
 
 
-def get_strategy():
+# def define_strategy():
+#     """
+#     Define strategy for model training:
+#     - TPU strongly recommanded
+#     - GPU very slow (1hr/epoch on full dataset)
+#     - CPU not recommended
+#     """
+#     if tf.config.list_logical_devices('TPU'):
+#         cluster_resolver = tf.distribute.cluster_resolver.TPUClusterResolver(tpu='')
+#         tf.config.experimental_connect_to_cluster(cluster_resolver)
+#         tf.tpu.experimental.initialize_tpu_system(cluster_resolver)
+#         strategy = tf.distribute.TPUStrategy(cluster_resolver)
+#         print('Using TPU')
+#     elif tf.config.list_logical_devices('GPU'):
+#         strategy = tf.distribute.MirroredStrategy()
+#         print('Using GPU')
+#     else:
+#         raise ValueError('Running on CPU is not recommended.')
+
+#     return strategy
+
+
+def define_strategy():
     """
     Define strategy for model training:
     - TPU strongly recommanded
-    - GPU very slow (1hr/epoch on full dataset)
-    - CPU not recommended
+    - Multiple GPUs - Not available on Google Colab
+    - One GPU - very slow (1hr/epoch on full dataset)
+    - CPU - Not recommended
     """
-    if tf.config.list_logical_devices('TPU'):
-        cluster_resolver = tf.distribute.cluster_resolver.TPUClusterResolver(tpu='')
-        tf.config.experimental_connect_to_cluster(cluster_resolver)
-        tf.tpu.experimental.initialize_tpu_system(cluster_resolver)
-        strategy = tf.distribute.TPUStrategy(cluster_resolver)
-        print('Using TPU')
-    elif tf.config.list_logical_devices('GPU'):
-        strategy = tf.distribute.MirroredStrategy()
-        print('Using GPU')
+    # Detect hardware
+    try:
+        tpu_resolver = tf.distribute.cluster_resolver.TPUClusterResolver() # TPU detection
+    except ValueError:
+        tpu_resolver = None
+        gpus = tf.config.list_logical_devices("GPU")
+
+    # Select appropriate distribution strategy
+    if tpu_resolver:
+        tf.config.experimental_connect_to_cluster(tpu_resolver)
+        tf.tpu.experimental.initialize_tpu_system(tpu_resolver)
+        strategy = tf.distribute.experimental.TPUStrategy(tpu_resolver)
+        print('Running on TPU ', tpu_resolver.cluster_spec().as_dict()['worker'])
+    elif len(gpus) > 1:
+        strategy = tf.distribute.MirroredStrategy([gpu.name for gpu in gpus])
+        print('Running on multiple GPUs ', [gpu.name for gpu in gpus])
+    elif len(gpus) == 1:
+        strategy = tf.distribute.get_strategy() # default strategy that works on CPU and single GPU
+        print('Running on single GPU ', gpus[0].name)
     else:
-        raise ValueError('Running on CPU is not recommended.')
+        strategy = tf.distribute.get_strategy() # default strategy that works on CPU and single GPU
+        print('Running on CPU - Not recommended')
+
+    print("Number of accelerators: ", strategy.num_replicas_in_sync)
 
     return strategy
 

@@ -125,7 +125,7 @@ gcp_submit_training:
 		--runtime-version=${RUNTIME_VERSION} \
 		--region ${REGION} \
 		--stream-logs \
-		--scale-tier BASIC_TPU \
+		--scale-tier=BASIC_TPU \
 
 
 
