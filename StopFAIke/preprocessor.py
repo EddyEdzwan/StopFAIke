@@ -1,3 +1,4 @@
+import os
 import numpy as np
 
 import tensorflow as tf
@@ -56,6 +57,9 @@ def define_strategy():
         tf.tpu.experimental.initialize_tpu_system(tpu_resolver)
         strategy = tf.distribute.experimental.TPUStrategy(tpu_resolver)
         print('Running on TPU ', tpu_resolver.cluster_spec().as_dict()['worker'])
+
+        os.environ["TFHUB_MODEL_LOAD_FORMAT"] = "UNCOMPRESSED"
+
     elif len(gpus) > 1:
         strategy = tf.distribute.MirroredStrategy([gpu.name for gpu in gpus])
         print('Running on multiple GPUs ', [gpu.name for gpu in gpus])
