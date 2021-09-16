@@ -156,8 +156,8 @@ class Trainer:
             print("### End of Training ...")
 
             # Print & plot some key training results
-            print("####### Train Accuracy", min(self.history.history["accuracy"]))
-            print("####### Val Accuracy", min(self.history.history["val_accuracy"]))
+            print("####### Train Accuracy", max(self.history.history["accuracy"]))
+            print("####### Val Accuracy", max(self.history.history["val_accuracy"]))
             print("####### epochs reached", len(self.history.epoch))
             if plot_history:
                 plot_loss(self.history, title='bert model - fine-tuning')
