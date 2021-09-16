@@ -103,7 +103,7 @@ def load_dataset(X, y, bert_preprocess_model, batch_size=32, is_training=True):
     if is_training:
         dataset = dataset.shuffle(num_examples)
         dataset = dataset.repeat()
-    dataset = dataset.batch(batch_size, drop_remainder=True)
+    dataset = dataset.batch(batch_size)
     dataset = dataset.map(lambda X_, y_: (bert_preprocess_model(X_), y_))
     dataset = dataset.cache().prefetch(buffer_size=AUTOTUNE)
     return dataset, num_examples
