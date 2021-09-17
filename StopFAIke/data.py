@@ -44,7 +44,7 @@ def preprocess_bisaillon(true_df, fake_df):
 
     Args:
         true_df DataFrame: news articles labeled TRUE
-        fake_df DataFrame: news articles labeled TRUE
+        fake_df DataFrame: news articles labeled FAKE
 
     Returns:
         Merged DataFrame
