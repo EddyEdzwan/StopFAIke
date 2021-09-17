@@ -7,7 +7,10 @@ wheel>=0.29
 # data science
 numpy
 pandas
+seaborn
+matplotlib
 scikit-learn
+tensorflow
 
 # tests/linter
 black
@@ -20,6 +23,8 @@ yapf
 gcsfs
 google-cloud-storage
 s3fs
+fastapi
+uvicorn
 
 # utilities
 six>=1.14
@@ -33,9 +38,7 @@ nltk==3.6.2
 bs4
 
 tensorflow_text
-tf-models-official
+# tf-models-official
 tensorflow-addons
 tensorflow-model-optimization>=0.1.3
 
-fastapi
-uvicorn
