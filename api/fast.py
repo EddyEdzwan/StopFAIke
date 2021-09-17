@@ -34,6 +34,4 @@ def predict(article):
 
     y_prob = reloaded_model(X['article'])
 
-    print(f"Probability (0 (True) - 1 (Fake)): {np.round(y_prob.numpy()[0][0], 3)}")
-
     return {'prediction': float(y_prob.numpy()[0][0])}

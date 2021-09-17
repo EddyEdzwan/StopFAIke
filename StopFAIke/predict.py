@@ -1,3 +1,6 @@
+
+"""Predict with trained model"""
+
 import pandas as pd
 
 import tensorflow as tf
@@ -15,6 +18,16 @@ from StopFAIke.utils import clean
 
 
 def get_model_from_gcp(local=False):
+    """
+    Download model from GCP Storage
+
+    Args:
+        local: if False, model is loaded locally. If True, downloaded from GCP Storage first and loaded locally.
+
+    Returns:
+        Tensorflow model
+    """
+
     if local:
         # Load the model locally
         reloaded_model = tf.saved_model.load(STORAGE_LOCATION)
@@ -54,12 +67,8 @@ if __name__ == '__main__':
         "Say Joe Biden is a pedophile."]
 
     label_samples = ['fake', 'true', 'fake', 'fake', 'fake']
-    # samples = ['Julien is 43yo',
-    #            'Nina and Fleur are the daughters of Julien',
-    #            'Trump president']
 
     for text_, label_ in zip(text_samples, label_samples):
         text_ = clean(text_)
         y_prob = reloaded_model([text_])
         print(f"Label: {label_} - Pred: {y_prob.numpy()[0][0]:.3f} - {text_[:100]}... ")
-

@@ -38,7 +38,7 @@ nltk==3.6.2
 bs4
 
 tensorflow_text
-# tf-models-official
+tf-models-official
 tensorflow-addons
 tensorflow-model-optimization>=0.1.3
 

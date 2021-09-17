@@ -1,3 +1,6 @@
+
+"""Preprocessing functions"""
+
 import os
 import numpy as np
 
@@ -32,18 +35,22 @@ AUTOTUNE = tf.data.experimental.AUTOTUNE
 #     else:
 #         strategy = tf.distribute.get_strategy()
 #         print('Using CPU (not recommended).')
-
 #     return strategy
 
 
 def define_strategy():
     """
-    Define strategy for model training:
-    - TPU strongly recommanded
-    - Multiple GPUs - Not available on Google Colab
-    - One GPU - very slow (1hr/epoch on full dataset)
-    - CPU - Not recommended
+    Detect automatically which processor units are available and define in function
+    which tensorflow strategy is best for training:
+        - TPU strongly recommanded
+        - Multiple GPUs - Not available on Google Colab
+        - One GPU - very slow (1hr/epoch on full dataset)
+        - CPU - Not recommended
+
+    Returns:
+        Tensorflow strategy object
     """
+
     # Detect hardware
     try:
         tpu_resolver = tf.distribute.cluster_resolver.TPUClusterResolver() # TPU detection
@@ -58,6 +65,7 @@ def define_strategy():
         strategy = tf.distribute.experimental.TPUStrategy(tpu_resolver)
         print('Running on TPU ', tpu_resolver.cluster_spec().as_dict()['worker'])
 
+        # Only for TPU, no link with startegy but needed to download BERT Preprocess / Encoder
         os.environ["TFHUB_MODEL_LOAD_FORMAT"] = "UNCOMPRESSED"
 
     elif len(gpus) > 1:
@@ -80,7 +88,16 @@ def get_model_name(BERT_MODEL_NAME=BERT_MODEL_NAME):
     Define BERT model:
     - Preprocessing
     - Encoder
+
+    Args:
+    BERT_MODEL_NAME: string
+
+    Returns:
+        tfhub_handle_preprocess: BERT preprocess url for Tensoflow Hub
+        tfhub_handle_encoder: BERT encoder url for Tensoflow Hub
+
     """
+
     tfhub_handle_preprocess = map_model_to_preprocess[BERT_MODEL_NAME]
     tfhub_handle_encoder = map_name_to_handle[BERT_MODEL_NAME]
     return tfhub_handle_preprocess, tfhub_handle_encoder
@@ -88,8 +105,16 @@ def get_model_name(BERT_MODEL_NAME=BERT_MODEL_NAME):
 
 def make_bert_preprocess_model(tfhub_handle_preprocess):
     """
-    Returns Keras Model to BERT inputs
+    Build BERT preprocessing Tensorflow model
+
+    Args:
+        tfhub_handle_preprocess: url for Tensoflow Hub
+
+    Returns:
+        BERT preprocessing Tensorflow model (not including in the model for
+        training time reduction purpose)
     """
+
     text_input = tf.keras.layers.Input(shape=(), dtype=tf.string, name='text')
     preprocessing_layer = hub.KerasLayer(tfhub_handle_preprocess, name='preprocessing')
     encoder_inputs = preprocessing_layer(text_input)
@@ -98,8 +123,20 @@ def make_bert_preprocess_model(tfhub_handle_preprocess):
 
 def load_dataset(X, y, bert_preprocess_model, batch_size=32, is_training=True):
     """
-    Datasets creation
+    Create Tensorflow datasets
+
+    Args:
+        X: pandas Series, text data
+        y: pandas Series, label data
+        bert_preprocess_model: BERT preprocessing Tensorflow model instance
+        batch_size: size of the batch
+        is_training: True only for training dataset
+
+    Returns:
+        dataset: optimized Tensorflow dataset
+        num_examples: number of samples (required for training parameters)
     """
+
     X = [np.array([item]) for item in X]
     dataset = tf.data.Dataset.from_tensor_slices((X, y))
     num_examples = len(X)

@@ -1,4 +1,6 @@
 
+"""Fine-tune a BERT model"""
+
 import os
 
 import numpy as np
@@ -74,8 +76,8 @@ class Trainer:
     @simple_time_tracker
     def clean(self):
         print("###### cleaning....")
-        self.X = clean_data(self.X, self.y)[0]
-        self.y = clean_data(self.X, self.y)[1]
+        self.X = clean_data(self.X, self.y, stopword=False, lemmat=False)[0]
+        self.y = clean_data(self.X, self.y, stopword=False, lemmat=False)[1]
 
     @simple_time_tracker
     def preproc(self, valtest_size=0.3):

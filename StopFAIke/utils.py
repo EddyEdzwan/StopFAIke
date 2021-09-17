@@ -1,3 +1,6 @@
+
+"""Helper functions"""
+
 import string
 import time
 
@@ -5,10 +8,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 import nltk
-
-from nltk.corpus import stopwords
-from nltk.stem.wordnet import WordNetLemmatizer
-from nltk import word_tokenize
 
 from nltk.corpus import stopwords
 from nltk.stem.wordnet import WordNetLemmatizer
@@ -26,22 +25,28 @@ nltk.download('stopwords')
 nltk.download('wordnet')
 
 
-def clean(text):
+def clean(text, stopword=False, lemmat=False):
     """
-    Cleaning data:
-    - Remove Punctuation
-    - Lower Case
-    - Tokenization
-    - Remove numbers
-    - Remove stopwords
-    - Lemmatization
+    Apply cleaning to data (text)
+        - Remove Punctuation
+        - Lower Case
+        - Tokenization
+        - Remove numbers
+        - Remove stopwords (if needed)
+        - Lemmatization (if needed)
 
-    TODO : include parameters to select Lemmatize, stop words ...
+    Args:
+        text: string
+        stopword: by default False (does not remove stop words)
+        lemmat: by default False (does not apply lemmatization)
+
+    Returns:
+        clean_text: string
     """
 
     # Remove Punctuation
     for punctuation in string.punctuation:
-        text = text.replace(punctuation, ' ')
+        text.replace(punctuation, ' ')
 
     # Lower Case
     lowercased = text.lower()
@@ -50,24 +55,29 @@ def clean(text):
     tokenized = word_tokenize(lowercased)
 
     # Remove numbers
-    words_only = [word for word in tokenized if word.isalpha()]
-
-    # Make stopword list
-    # stop_words = set(stopwords.words('english'))
+    words = [word for word in tokenized if word.isalpha()]
 
     # Remove Stop Words
-    # without_stopwords = [word for word in words_only if not word in stop_words]
+    if stopword:
+        stop_words = set(stopwords.words('english'))
+        words = [word for word in words if not word in stop_words]
 
     # Lemmatize
-    # lemma = WordNetLemmatizer() # Initiate Lemmatizer
-    # lemmatized = [lemma.lemmatize(word) for word in without_stopwords]
-    return ' '.join(word for word in words_only)
+    if lemmat:
+        lemma = WordNetLemmatizer()
+        words = [lemma.lemmatize(word) for word in words]
+    return ' '.join(word for word in words)
 
 
 def plot_loss(history, title=None):
     """
     Plotting history model training
+
+    Args:
+        history: history from Tensorflow model fit method
+        title: string
     """
+
     fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(18, 4))
     ax1.plot(history.history['loss'])
     ax1.plot(history.history['val_loss'])
@@ -99,8 +109,18 @@ def plot_loss(history, title=None):
 
 def binary_metrics(y_test, y_pred):
     """
-    Get binary binary_metrics
+    Return binary metrics:
+        - Accuracy score
+        - Recall score
+        - Precision score
+        - f1 score
+
+
+    Args:
+        y_test: true labels
+        y_pred: predicted labels
     """
+
     print('-'*80)
     print('Acc: {:.2f}'.format(accuracy_score(y_test, y_pred)))
     print('Recall: {:.2f}'.format(recall_score(y_test, y_pred)))
@@ -111,8 +131,15 @@ def binary_metrics(y_test, y_pred):
 
 def get_metrics_ds(y_test, ds, model):
     """
-    Get metrics for model evaluation on test set
+    Returns metrics for model evaluation
+
+    Args:
+        y_test: true label
+        ds: Tensorflow dataset (including X_test preprocessed)
+        model: Tensorflow model
+
     """
+
     y_prob = model.predict(ds)
     y_pred = np.where(y_prob > 0.5, 1, 0)
 

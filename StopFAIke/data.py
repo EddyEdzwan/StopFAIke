@@ -1,3 +1,6 @@
+
+"""Get data, cleaning, preprocessing"""
+
 import pandas as pd
 
 from sklearn.model_selection import train_test_split
@@ -21,16 +24,32 @@ from StopFAIke.params import PO_TRAIN_DATA_PATH
 
 def get_data_from_gcp(BUCKET_NAME, BUCKET_TRAIN_DATA_PATH):
     """
-    Method to get the training data from GCP
+    Function to get the training data from GCP Storage
+
+    Args:
+        BUCKET_NAME: string, Google Storage Bucket name
+        BUCKET_TRAIN_DATA_PATH: string, Google Storage Bucket subdirectory name
+
+    Returns:
+        DataFrame
     """
+
     df = pd.read_csv(f"gs://{BUCKET_NAME}/{BUCKET_TRAIN_DATA_PATH}")
     return df
 
 
 def preprocess_bisaillon(true_df, fake_df):
     """
-    Merge Nisaillon datsets (true + fake)
+    Merge Bisaillon datasets (true + fake)
+
+    Args:
+        true_df DataFrame: news artciles labeled TRUE
+        fake_df DataFrame: news artciles labeled TRUE
+
+    Returns:
+        Merged DataFrame
     """
+
     true_df.drop_duplicates(inplace=True)
     fake_df.drop_duplicates(inplace=True)
 
@@ -41,12 +60,20 @@ def preprocess_bisaillon(true_df, fake_df):
 
 def get_data(nrows=100_000):
     """
-    Get all datasets (4) in once:
-    - Politifact dataset: scrapped
-    - FakeNewsNET: github repository
-    - Bisaillon: Kaggle
-    - Poynter: scrapped
+    Merge all datasets:
+    - Politifact dataset: from scrapping - X (fact) / y (label)
+    - FakeNewsNET: from github repository - X (title) / y(label)
+    - Bisaillon: from Kaggle - X(title) / y(label)
+    - Poynter: from scrapping - X (fact) / y (label)
+
+    Args:
+        nrows: number of lines to keep
+
+    Returns:
+        X: pandas Series, text data
+        y: pandas Series, label data
     """
+
     # Politifact
     P_df = get_data_from_gcp(BUCKET_NAME, P_TRAIN_DATA_PATH)
     X_P = P_df['statement'].copy()
@@ -76,32 +103,54 @@ def get_data(nrows=100_000):
     return X, y
 
 
-def clean_data(X, y):
+def clean_data(X, y, stopword=False, lemmat=False):
     """
     Apply cleaning to dataset
+
+    Args:
+        X: pandas Series (text)
+        y: pandas Series (label)
+        stopword: False (does not remove stop words)
+        lemmat: False (does not apply lemmatization)
+
+    Returns:
+        X_clean: pandas Series, cleaned text data
+        y as pandas Series, label data
     """
-    X_clean = X.apply(clean)
+    X_clean = X.apply(clean, stopword=stopword, lemmat=lemmat)
     return X_clean, y
 
 
 def get_splits(X, y, valtest_size=0.3):
     """
-    Method to split data in Train/Val/Test
+    Function to split data in Train/Val/Test
+
+    Args:
+        X: pandas Series (text)
+        y: pandas Series (label)
+        valtest_size: size (in fraction) dedicated for val and test sets.
+
+    Returns:
+        X_train, y_train: pandas Series, training data
+        X_val, y_val: pandas Series, val data
+        X_test, y_test: pandas Series, test data
     """
+
     X_train, X_valtest, y_train, y_valtest = train_test_split(X, y, test_size=valtest_size, random_state=42)
     X_val, X_test, y_val, y_test = train_test_split(X_valtest, y_valtest, test_size=0.5, random_state=42)
     return X_train, y_train, X_val, y_val, X_test, y_test
 
 
 if __name__ == '__main__':
+
     # get data from GCP bucket
     X, y = get_data(nrows=1_000)
 
-    # clean data from GCP bucket
-    X, y = clean_data(X, y)
+    # clean data
+    X_clean, y = clean_data(X, y, stopword=False, lemmat=False)
 
     # train/val/test split
-    X_train, y_train, X_val, y_val, X_test, y_test = get_splits(X, y, valtest_size=0.3)
+    X_train, y_train, X_val, y_val, X_test, y_test = get_splits(X_clean, y, valtest_size=0.3)
 
     print('-'*80)
     print(f"X_train shape: {X_train.shape}")

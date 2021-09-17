@@ -1,3 +1,6 @@
+
+"""Build Tensorflow BERT model"""
+
 import tensorflow as tf
 import tensorflow_hub as hub
 import tensorflow_text as text
@@ -9,6 +12,12 @@ def build_classifier_model(tfhub_handle_encoder):
     Build BERT model:
     - BERT encoder
     - Dedicated dense layers on top.
+
+    Args:
+        tfhub_handle_encoder: string, BERT encoder name
+
+    Returns:
+        Tensorflow model
     """
 
     class Classifier(tf.keras.Model):

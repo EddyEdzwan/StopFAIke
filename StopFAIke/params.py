@@ -6,27 +6,19 @@ BUCKET_NAME = 'wagon-data-615-seguy'
 BUCKET_FOLDER = 'data'
 
 ##### Data  - - - - - - - - - - - - - - - - - - - - - - - -
-
-# train data file location
-# /!\ here you need to decide if you are going to train using the provided and uploaded data/train_1k.csv sample file
-# or if you want to use the full dataset (you need need to upload it first of course)
 P_TRAIN_DATA_PATH = 'data/politifact_scrap.csv'
 FNN_TRAIN_DATA_PATH = 'data/FakesNewsNET.csv'
 BIS_T_TRAIN_DATA_PATH = 'data/True.csv'
 BIS_F_TRAIN_DATA_PATH = 'data/Fake.csv'
 PO_TRAIN_DATA_PATH = 'data/poynter_final_condensed.csv'
 
-
 # model folder name (will contain the folders for all trained model versions)
 MODEL_NAME = 'StopFAIke'
-
-# model version folder name (where the trained model.joblib file will be stored)
-MODEL_VERSION = 'v1'
 
 STORAGE_LOCATION = 'models/StopFAIke/bert_en_uncased_L-12_H-768_A-12'
 # STORAGE_LOCATION = 'models/StopFAIke/bert_model_debugging'
 
-### BERT Models - - - - - - - - - - - - - - - - - - - - - -
+### BERT Preporcess / Models - - - - - - - - - - - - - - -
 BERT_MODEL_NAME = 'bert_en_uncased_L-12_H-768_A-12'
 
 map_name_to_handle = {
