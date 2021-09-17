@@ -43,8 +43,8 @@ def preprocess_bisaillon(true_df, fake_df):
     Merge Bisaillon datasets (true + fake)
 
     Args:
-        true_df DataFrame: news artciles labeled TRUE
-        fake_df DataFrame: news artciles labeled TRUE
+        true_df DataFrame: news articles labeled TRUE
+        fake_df DataFrame: news articles labeled TRUE
 
     Returns:
         Merged DataFrame
