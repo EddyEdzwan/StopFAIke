@@ -69,6 +69,6 @@ if __name__ == '__main__':
     label_samples = ['fake', 'true', 'fake', 'fake', 'fake']
 
     for text_, label_ in zip(text_samples, label_samples):
-        text_ = clean(text_)
+        text_ = clean(text_, stopword=False, lemmat=False)
         y_prob = reloaded_model([text_])
         print(f"Label: {label_} - Pred: {y_prob.numpy()[0][0]:.3f} - {text_[:100]}... ")

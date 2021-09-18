@@ -1,5 +1,5 @@
 
-"""Get data, cleaning, preprocessing"""
+"""Loading data, cleaning, preprocessing"""
 
 import pandas as pd
 

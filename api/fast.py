@@ -8,6 +8,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from StopFAIke.predict import get_model_from_gcp
 
+from StopFAIke.utils import clean
+
 app = FastAPI()
 
 app.add_middleware(
@@ -30,8 +32,16 @@ def index():
 @app.get("/predict")
 def predict(article):
 
-    X = dict(article=[article])
+    X = dict(article=article)
 
-    y_prob = reloaded_model(X['article'])
+    print(X)
+
+    # cleaning
+    X_clean = clean(X['article'], stopword=False, lemmat=False)
+
+    # prediction
+    y_prob = reloaded_model([X_clean])
+
+    print(type(X_clean))
 
     return {'prediction': float(y_prob.numpy()[0][0])}
