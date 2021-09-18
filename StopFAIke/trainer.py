@@ -33,16 +33,8 @@ from StopFAIke.utils import simple_time_tracker
 from StopFAIke.utils import plot_loss
 from StopFAIke.utils import get_metrics_ds
 
-AUTOTUNE = tf.data.experimental.AUTOTUNE    # (AUTOTUNE = tf.data.AUTOTUNE)
+AUTOTUNE = tf.data.experimental.AUTOTUNE
 
-
-# import warnings
-# warnings.simplefilter(action='ignore', category=FutureWarning)
-
-# from termcolor import colored
-# print(colored("############  Training model   ############", "red"))
-# print(colored("############  Evaluating model ############", "blue"))
-# print(colored("############   Saving model    ############", "green"))
 
 class Trainer:
     def __init__(self):
@@ -69,23 +61,39 @@ class Trainer:
 
     @simple_time_tracker
     def load_data(self, nrows=1_000):
+        """
+        Method to load data
+
+        Args:
+            nrows: number of lines to keep
+        """
+
         print("###### Loading data....")
         self.X = get_data(nrows=nrows)[0]
         self.y = get_data(nrows=nrows)[1]
 
     @simple_time_tracker
     def clean(self):
+        """
+        Method to clean data
+        """
+
         print("###### cleaning....")
         self.X = clean_data(self.X, self.y, stopword=False, lemmat=False)[0]
         self.y = clean_data(self.X, self.y, stopword=False, lemmat=False)[1]
 
     @simple_time_tracker
     def preproc(self, valtest_size=0.3):
+        """
+        Method to split data in Train/Val/Test
+
+        Args:
+            valtest_size: size (in fraction) dedicated for val and test sets.
+        """
+
         print("###### preprocessing....")
         self.X_train, self.y_train, self.X_val, self.y_val, self.X_test, self.y_test = get_splits(self.X, self.y, valtest_size=valtest_size)
 
-        # self.pipe = create_pipeline()
-        # self.X_train_preproc = self.pipe.fit_transform(self.X_train)
         print('-'*80)
         print(f"###### shape of X_train, y_train: {self.X_train.shape, self.y_train.shape}")
         print(f"###### shape of X_val, y_val: {self.X_val.shape, self.y_val.shape}")
@@ -95,8 +103,9 @@ class Trainer:
     @simple_time_tracker
     def train_model(self, BERT_MODEL_NAME=BERT_MODEL_NAME, init_lr=3e-5, epochs=1, batch_size=32, plot_history=True):
         """
-        Traing BERT model on Google Colab (TPU strongly recommended)
+        Traing BERT model (TPU strongly recommended)
         """
+
         self.tfhub_handle_preprocess = get_model_name(BERT_MODEL_NAME)[0]
         self.tfhub_handle_encoder = get_model_name(BERT_MODEL_NAME)[1]
         self.init_lr = init_lr
@@ -168,8 +177,8 @@ class Trainer:
     def evaluate_model(self, X_test=None, y_test=None):
         """
         Evaluates the model on a test set.
-        Return the metrics: Acc, Recall, Precision, f1 score
         """
+
         # If no test set is given, use the holdout from train/test/split
         print("###### evaluating the model on a test set...")
         X_test = X_test or self.X_test
@@ -182,8 +191,12 @@ class Trainer:
     @simple_time_tracker
     def save_model(self):
         """
-        Saving model to Google Colab
+        Saving model
+
+        Returns:
+            Tensorflow model (format SavedModel)
         """
+
         # main_save_path = './my_models'
         # saved_model_name = 'my_bert_model'
 
@@ -191,9 +204,9 @@ class Trainer:
         # bert_type = BERT_MODEL_NAME
         # saved_model_name = f'{prefix}_{bert_type}'
 
-        saved_model_path = STORAGE_LOCATION
-
         # saved_model_path = os.path.join(main_save_path, saved_model_name)
+
+        saved_model_path = STORAGE_LOCATION
 
         preprocess_inputs = self.bert_preprocess_model.inputs
         bert_encoder_inputs = self.bert_preprocess_model(preprocess_inputs)

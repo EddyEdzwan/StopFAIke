@@ -19,7 +19,6 @@ from StopFAIke.params import PO_TRAIN_DATA_PATH
 # true_path = 'https://storage.googleapis.com/wagon-data-615-seguy/data/True.csv'
 # fake_path = 'https://storage.googleapis.com/wagon-data-615-seguy/data/Fake.csv'
 # path = 'https://storage.googleapis.com/wagon-data-615-seguy/data/poynter_final_condensed.csv'
-# df = pd.read_csv(path, nrows=nrows)
 
 
 def get_data_from_gcp(BUCKET_NAME, BUCKET_TRAIN_DATA_PATH):

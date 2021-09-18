@@ -128,23 +128,8 @@ gcp_submit_training:
 		--scale-tier=BASIC_TPU \
 
 
-
-# gcloud ai-platform jobs submit training tpu_mnist_1 \
-#   --staging-bucket=gs://BUCKET_NAME \
-#   --package-path=official \
-#   --module-name=official.vision.image_classification.mnist_main \
-#   --runtime-version=2.5 \
-#   --python-version=3.7 \
-#   --scale-tier=BASIC_TPU \
-#   --region=us-central1 \
-#   -- \
-#   --distribution_strategy=tpu \
-#   --data_dir=gs://tfds-data/datasets \
-#   --model_dir=gs://BUCKET_NAME/tpu_mnist_1_output
-
-
-
 ##### Prediction API - - - - - - - - - - - - - - - - - - - - - - - - -
-
 run_api:
 	uvicorn api.fast:app --reload  # load web server with code autoreload
+
+
