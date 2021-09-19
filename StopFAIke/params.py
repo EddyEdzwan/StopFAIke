@@ -15,7 +15,8 @@ PO_TRAIN_DATA_PATH = 'data/poynter_final_condensed.csv'
 # model folder name (will contain the folders for all trained model versions)
 MODEL_NAME = 'StopFAIke'
 
-STORAGE_LOCATION = 'models/StopFAIke/bert_en_uncased_L-12_H-768_A-12'
+# STORAGE_LOCATION = 'models/StopFAIke/bert_en_uncased_L-12_H-768_A-12'
+STORAGE_LOCATION = 'models/StopFAIke/bert_en_uncased_L-12_H-768_A-12_text'
 # STORAGE_LOCATION = 'models/StopFAIke/bert_model_debugging'
 
 ### BERT Preporcess / Models - - - - - - - - - - - - - - -
