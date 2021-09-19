@@ -60,7 +60,7 @@ class Trainer:
         self.history = None
 
     @simple_time_tracker
-    def load_data(self, nrows=1_000):
+    def load_data(self, nrows=1_000, title=True):
         """
         Method to load data
 
@@ -69,8 +69,8 @@ class Trainer:
         """
 
         print("###### Loading data....")
-        self.X = get_data(nrows=nrows)[0]
-        self.y = get_data(nrows=nrows)[1]
+        self.X = get_data(nrows=nrows, title=title)[0]
+        self.y = get_data(nrows=nrows, title=title)[1]
 
     @simple_time_tracker
     def clean(self):
@@ -225,7 +225,7 @@ if __name__ == '__main__':
     trainer = Trainer()
 
     # Load data with number of rows to download and use
-    trainer.load_data(nrows=1_000)
+    trainer.load_data(nrows=1_000, title=True)
 
     # Clean data
     trainer.clean()

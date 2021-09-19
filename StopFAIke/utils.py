@@ -69,6 +69,26 @@ def clean(text, stopword=False, lemmat=False):
     return ' '.join(word for word in words)
 
 
+def drop_prefix(text, prefix='(Reuters)', n=5):
+    """
+    Returns string without prefix
+
+    Args:
+        text: string
+        prefix: string
+        n:
+
+    Returns:
+        clean_text: string
+
+    """
+    ts = str.split(text,' ')
+    if prefix in ts[:n]:
+        return str.split(text, prefix)[-1]
+    else:
+        return text
+
+
 def plot_loss(history, title=None):
     """
     Plotting history model training

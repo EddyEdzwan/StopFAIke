@@ -14,6 +14,8 @@ from StopFAIke.params import BIS_T_TRAIN_DATA_PATH
 from StopFAIke.params import BIS_F_TRAIN_DATA_PATH
 from StopFAIke.params import PO_TRAIN_DATA_PATH
 
+from StopFAIke.utils import drop_prefix
+
 # path = 'https://storage.googleapis.com/wagon-data-615-seguy/data/politifact_scrap.csv'
 # path = 'https://storage.googleapis.com/wagon-data-615-seguy/data/FakesNewsNET.csv'
 # true_path = 'https://storage.googleapis.com/wagon-data-615-seguy/data/True.csv'
@@ -57,7 +59,7 @@ def preprocess_bisaillon(true_df, fake_df):
     return pd.concat([true_df, fake_df]).reset_index(drop=True)
 
 
-def get_data(nrows=100_000):
+def get_data(nrows=100_000, title=True):
     """
     Merge all datasets:
     - Politifact dataset: from scrapping - X (fact) / y (label)
@@ -67,6 +69,8 @@ def get_data(nrows=100_000):
 
     Args:
         nrows: number of lines to keep
+        title: if True, article title as X, if False, article text as X
+        (FNN / Bisaillon datasets)
 
     Returns:
         X: pandas Series, text data
@@ -80,14 +84,21 @@ def get_data(nrows=100_000):
 
     # FakeNewsNET
     FNN_df = get_data_from_gcp(BUCKET_NAME, FNN_TRAIN_DATA_PATH)
-    X_FNN = FNN_df['title'].copy()
+    if title:
+        X_FNN = FNN_df['title'].copy()
+    else:
+        X_FNN = FNN_df['text'].copy()
     y_FNN = FNN_df['category'].copy()
 
     # Bisaillon
     BIS_T_df = get_data_from_gcp(BUCKET_NAME, BIS_T_TRAIN_DATA_PATH)
     BIS_F_df = get_data_from_gcp(BUCKET_NAME, BIS_F_TRAIN_DATA_PATH)
     BIS_df = preprocess_bisaillon(BIS_T_df, BIS_F_df)
-    X_BIS = BIS_df['title'].copy()
+    BIS_df['clean_text'] = BIS_df['text'].apply(drop_prefix)
+    if title:
+        X_BIS = BIS_df['title'].copy()
+    else:
+        X_BIS = BIS_df['clean_text'].copy()
     y_BIS = BIS_df['category'].copy()
 
     # Poynter
@@ -143,7 +154,7 @@ def get_splits(X, y, valtest_size=0.3):
 if __name__ == '__main__':
 
     # get data from GCP bucket
-    X, y = get_data(nrows=1_000)
+    X, y = get_data(nrows=1_000, title=True)
 
     # clean data
     X_clean, y = clean_data(X, y, stopword=False, lemmat=False)
