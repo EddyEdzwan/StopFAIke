@@ -194,7 +194,7 @@ class Trainer:
         Saving model
 
         Returns:
-            Tensorflow model (format SavedModel)
+            Tensorflow model (SavedModel format)
         """
 
         # main_save_path = './my_models'
