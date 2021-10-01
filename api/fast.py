@@ -50,6 +50,7 @@ def f(x):
 # Initialising the shap.Explainer object
 explainer = shap.Explainer(f, masker=bert_tokenizer_pretrained, output_names=['TRUE', 'FAKE'])
 
+
 @app.get("/")
 def index():
     return {'message': 'This is StopFAIke API!'}
@@ -71,6 +72,7 @@ def predict(article):
     print(type(X_clean))
 
     return {'prediction': float(y_prob.numpy()[0][0])}
+
 
 @app.get("/shapvalues")
 def shapvalues(article):

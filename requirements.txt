@@ -43,3 +43,4 @@ tensorflow-addons
 tensorflow-model-optimization>=0.1.3
 
 transformers
+shap
