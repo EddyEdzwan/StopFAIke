@@ -2,7 +2,7 @@ FROM python:3.8.6-buster
 
 COPY api /api
 COPY StopFAIke /StopFAIke
-COPY models/StopFAIke/bert_en_uncased_L-12_H-768_A-12_text /models/StopFAIke/bert_en_uncased_L-12_H-768_A-12_text
+COPY models/StopFAIke/bert_en_uncased_L-12_H-768_A-12 /models/StopFAIke/bert_en_uncased_L-12_H-768_A-12
 COPY requirements.txt /requirements.txt
 
 RUN pip install --upgrade pip
